@@ -8,8 +8,77 @@
 #include <pspwlan.h>
 #include <pspsysmem.h>
 
+#include "systemctrl.h"
+
 PSP_MODULE_INFO("EVEREST_KERNEL", 0x1006, 7, 4);
 PSP_MAIN_THREAD_ATTR(0);
+
+#define MAKE_CALL(f) (0x0C000000 | (((u32)(f) >> 2) & 0x03ffffff))
+
+/**
+ * This structure contains console specific information. It is a subset of the ::SceConsoleId.
+ * Check <openpsid_kernel.h> for possible member values.
+ */
+typedef struct {
+	/* Company code. Set to 1. */
+	u16 companyCode; // 0
+	/* Product code. */
+	u16 productCode; // 2
+	/* Product sub code. */
+	u16 productSubCode; // 4
+	/* Factory code. */
+	u16 factoryCode; // 6
+} ScePsCode; // size = 8
+
+/**
+ * This structure represents a unique per-console identifier. It contains console specific information and can be used,
+ * for example, for DRM purposes and simple PSP hardware model checks.
+ *
+ * @remark On the PSP, Sony uses the term "PSID" (not to mixup with the term "OpenPSID" which represents a different set of
+ * unique identifier bits). On later consoles, like the PS Vita and PS4, Sony uses the term "ConsoleId" for this set of
+ * identifier bits. To be consistent within the PS family, we are going with the term "ConsoleId" here, even though APIs like
+ * sceOpenPSIDGetPSID() (which returns the ConsoleId) will remain as originally named by Sony.
+ */
+typedef struct {
+	/* Unknown. On retail set to 0. */
+	u16 unk0; // 0
+	/* Company code. Set to 1. */
+	u16 companyCode; // 2
+	/* Product code. */
+	u16 productCode; // 4
+	/* Product sub code. */
+	u16 productSubCode; // 6
+	/* Upper two bit of PsFlags. */
+	u8 psFlagsMajor : 2; // 8
+	/* Factory code. */
+	u8 factoryCode : 6; // 8
+	u8 uniqueIdMajor : 2; // 9
+	/* Lower six bit of the PsFlags. Contain the QA flag, if set. */
+	u8 psFlagsMinor : 6; // 9
+	u8 uniqueIdMinor[6]; // 10
+} SceConsoleId; // size = 16
+
+/*
+ * This structure contains the ConsoleId (termed "PSID" on the PSP) and an ECDSA signature used to verify the correctness of the 
+ * ConsoleId.
+ * The ConsoleId is used, for example, in PSN DRM, DNAS and system configuration (with its derived PSCode).
+ */
+typedef struct {
+	/* Unique per-console identifier. */
+	SceConsoleId consoleId; // 0
+	/* Contains the public key of the certificate. No padding. */
+	u8 plantextPublicKey[0x28]; // 16
+	/* The 'r' part of the ECDSA signature pair (r, s). */
+	u8 r[0x14]; // 56
+	/* The 's' part of the ECDSA signature pair (r, s). */
+	u8 s[0x14]; // 76
+	/* The ECDSA public key (can be used to verify ECDSA signature rs). */
+	u8 publicKey[0x28]; // 96
+	/* Contains the encrypted private key of the certificate (with padding). */
+	u8 encPrivateKey[0x20]; // 136
+	/* Hash of previous data. */
+	u8 hash[0x10]; // 168
+} SceIdStorageConsoleIdCertificate; // size = 184
 
 u32 sceSysconGetBaryonVersion(u32 *baryon); // Baryon
 u32 sceSysconGetPommelVersion(u32 *pommel); // Pommel
@@ -17,9 +86,26 @@ u64 sceSysreg_driver_4F46EEDE(void);        // FuseId
 u32 sceSysreg_driver_8F4F4E96(void);        // FuseCfg
 int sceSysregKirkBusClockEnable(void);      // Kirk
 int sceSysregAtaBusClockEnable(void);       // Spock
-
-u32 sceSyscon_readbat371(u8 addr);
 u32 sceSysconCmdExec(void *param, int unk);
+
+static int (*sceUtilsBufferCopyWithRange)(u8* outbuff, int outsize, u8* inbuff, int insize, int cmd);
+static SceIdStorageConsoleIdCertificate g_ConsoleIdCertificate;
+
+static int _sceUtilsBufferCopyWithRange(u8* outbuff, int outsize, u8* inbuff, int insize, int cmd) {
+	return (*sceUtilsBufferCopyWithRange)(outbuff, outsize, inbuff, insize, cmd);
+}
+
+void pspPatchMemlmd(SceModule* mod1) {
+	SceModule2 *mod = (SceModule2*) mod1;
+	u32 text_addr = mod->text_addr;
+	sceUtilsBufferCopyWithRange = (void*)(sctrlHENFindFunction("sceMemlmd", "semaphore", 0x4C537C72));
+	_sw(MAKE_CALL(_sceUtilsBufferCopyWithRange), text_addr+0x000009FC);
+}
+
+void pspSyncCache(void) {
+	sceKernelIcacheInvalidateAll();
+	sceKernelDcacheWritebackInvalidateAll();
+}
 
 u32 pspGetBaryonVersion(u32 *baryon) {
 	int k1 = pspSdkSetK1(0);
@@ -91,13 +177,14 @@ u32 pspNandGetScramble(void) {
 	return magic;
 }
 
-void pspIdStorageLookup(u16 key, u32 offset, void *buf, u32 len) {
+int pspIdStorageLookup(u16 key, u32 offset, void *buf, u32 len) {
 	int k1 = pspSdkSetK1(0);
 
 	memset(buf, 0, len);
-	sceIdStorageLookup(key, offset, buf, len);
+	int ret = sceIdStorageLookup(key, offset, buf, len);
 
 	pspSdkSetK1(k1);
+	return ret;
 }
 
 /*
@@ -265,7 +352,46 @@ int pspReadSerial(u16 *pdata) {
 	return err;
 }
 
+// Re-implementation of Subroutine sub_000001C4 - Address 0x000001C4 (openpsid.prx)
+int sceOpenPSIDLookupAndVerifyConsoleIdCertificate(void) {
+    int ret = 0;
+	const int KIRK_CERT_LEN = 0xB8;
+
+    /* Obtain a ConsoleId certificate. TODO: Use include/idstorage.h for these values once chkreg gets merged */
+    ret = pspIdStorageLookup(0x100, 0x38, &g_ConsoleIdCertificate, KIRK_CERT_LEN);
+    if (ret < 0) {
+        ret = pspIdStorageLookup(0x120, 0x38, &g_ConsoleIdCertificate, KIRK_CERT_LEN);
+        if (ret < 0)
+            return 0xC0520002;
+    }
+	
+	int k1 = pspSdkSetK1(0);
+	ret = _sceUtilsBufferCopyWithRange(NULL, 0, (u8 *)&g_ConsoleIdCertificate, KIRK_CERT_LEN, 0x12);
+	pspSdkSetK1(k1);
+	
+	if (ret != 0)
+        return 0xC0520001;
+	
+    return 0;
+}
+
+// Reimplementation of Subroutine sceChkreg_driver_59F8491D (without sema) - Address 0x00000438
+int pspChkregGetPsCode(ScePsCode *pPsCode) {
+	int ret = 0;
+	
+	if (((ret = sceOpenPSIDLookupAndVerifyConsoleIdCertificate()) == 0)) {
+		pPsCode->companyCode = g_ConsoleIdCertificate.consoleId.companyCode;
+		pPsCode->productCode = g_ConsoleIdCertificate.consoleId.productCode;
+		pPsCode->productSubCode = g_ConsoleIdCertificate.consoleId.productSubCode;
+		pPsCode->factoryCode = g_ConsoleIdCertificate.consoleId.factoryCode;
+	}
+
+	return ret;
+}
+
 int module_start(SceSize args __attribute__((unused)), void *argp __attribute__((unused))) {
+	pspPatchMemlmd(sceKernelFindModuleByName("sceMesgLed"));
+	pspSyncCache();
 	return 0;
 }
 
