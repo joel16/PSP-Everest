@@ -27,7 +27,7 @@ PSP_MAIN_THREAD_ATTR(0);
 #define NUM_DEL_ITEMS_MAIN 4
 #define NUM_DEL_ITEMS_HARDWARE 18
 #define NUM_DEL_ITEMS_BATTERY 12
-#define NUM_DEL_ITEMS_SYSTEM 7
+#define NUM_DEL_ITEMS_SYSTEM 11
 
 #define EVE_ENTER_EN "Enter"
 #define EVE_BACK_EN "Back"
@@ -35,7 +35,7 @@ PSP_MAIN_THREAD_ATTR(0);
 VlfText main_menu[NUM_DEL_ITEMS_MAIN], text_hardware[NUM_DEL_ITEMS_HARDWARE], text_battery[NUM_DEL_ITEMS_BATTERY], text_system[NUM_DEL_ITEMS_SYSTEM], title_text;
 VlfPicture title_pic, pic_button_assign;
 
-int battery_break = 0, battery_fade_ctrl = 0, background_number, max_background_number, focus;
+int battery_break = 0, battery_fade_ctrl = 0, focus;
 unsigned int button_assign;
 char kirk[4], spock[4];
 u32 fusecfg, scramble;
@@ -43,6 +43,8 @@ u16 bserialdata[2], serialdata[2];
 u64 fuseid;
 int psp_model, devkit, language;
 u32 tachyon, baryon, pommel;
+ScePsCode pscode;
+int pscodeRet = 0;
 
 int scePowerGetBatteryRemainCapacity(void);
 int scePowerGetBatteryFullCapacity(void);
@@ -278,32 +280,36 @@ void SystemInfo(void) {
 	memset(password, 0, sizeof(password));
 
 	SetTitle(trans->system_title);
-
-	text_system[0] = pspEverestPrintf(10, 45, trans->system.fw, pspGetFirmwareName());
-	text_system[1] = pspEverestPrintf(10, 65, trans->system.button_assign);
+	
+	text_system[0] = pspEverestPrintf(10, 40, trans->system.fw, pspGetFirmwareName());
+	text_system[1] = pspEverestPrintf(10, 60, trans->system.button_assign);
+	text_system[2] = pspEverestPrintf(10, 80, "Company code: 0x%02X", pscode.companyCode);
+	text_system[3] = pspEverestPrintf(10, 100, "Product sub code: 0x%02X", pscode.productSubCode);
 
 	if (button_assign)
 		pic_button_assign = vlfGuiAddPictureResource("system_plugin_fg.rco", "tex_cross", 4, -2);
 	else
 		pic_button_assign = vlfGuiAddPictureResource("system_plugin_fg.rco", "tex_circle", 4, -2);
 
-	vlfGuiSetPictureXY(pic_button_assign, 131, 68);
+	vlfGuiSetPictureXY(pic_button_assign, 131, 63);
 
 	
 	char unicode_username[26];
 	utf82unicode((wchar_t *)unicode_username, (char *)GetRegistryValue("/CONFIG/SYSTEM", "owner_name", &username, sizeof(username), 0));
 
-	text_system[2] = pspEverestPrintf(237, 45, trans->system.username);
-	text_system[3] = vlfGuiAddTextW(language == PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN ? 337 : 327, 45, (u16 *)unicode_username);
-	text_system[4] = pspEverestPrintf(237, 65, trans->system.password, GetRegistryValue("/CONFIG/SYSTEM/LOCK", "password", &password, sizeof(password), 0));
-	text_system[5] = pspEverestPrintf(10, 120, "version.txt:");
+	text_system[4] = pspEverestPrintf(237, 40, trans->system.username);
+	text_system[5] = vlfGuiAddTextW(language == PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN ? 337 : 327, 40, (u16 *)unicode_username);
+	text_system[6] = pspEverestPrintf(237, 60, trans->system.password, GetRegistryValue("/CONFIG/SYSTEM/LOCK", "password", &password, sizeof(password), 0));
+	text_system[7] = pspEverestPrintf(237, 80, "Product code: 0x%02X", pscode.productCode);
+	text_system[8] = pspEverestPrintf(237, 100, "Factory code: 0x%02X", pscode.factoryCode);
 
+	text_system[9] = pspEverestPrintf(10, 130, "version.txt:");
 	if (vertxt != NULL)
-		text_system[6] = vlfGuiAddTextF(10, 143, pspGetVersionTxt());
+		text_system[10] = vlfGuiAddTextF(10, 155, pspGetVersionTxt());
 	else
-		text_system[6] = pspEverestPrintf(10, 143, trans->system.vertxterr);
+		text_system[10] = pspEverestPrintf(10, 155, trans->system.vertxterr);
 
-	vlfGuiSetTextFontSize(text_system[6], 0.75f);
+	vlfGuiSetTextFontSize(text_system[10], 0.75f);
 
 	SetBottomDialog(0, 1, ExitInMainMenuSystemInfo, 1);
 	SetFade();
@@ -330,7 +336,7 @@ void SetTitle(char *text) {
 	title_text = pspEverestPrintf(30, 1, text);
 	title_pic = vlfGuiAddPictureResource("ps3scan_plugin.rco", "tex_infobar_icon", 4, -2);
 
-	vlfGuiSetTitleBar(title_text, title_pic, 1, 0);
+	vlfGuiSetTitleBarEx(title_text, title_pic, 1, 0, 18);
 }
 
 void SetFade(void) {
@@ -433,12 +439,7 @@ void MainMenu(int select) {
 }
 
 void SetBackground(void) {
-	if (background_number < 0)
-		background_number = max_background_number;
-	else if (background_number > max_background_number)
-		background_number = 0;
-
-	vlfGuiSetBackgroundFileBuffer(backgrounds_bmp + background_number * 6176, 6176, 1);
+	vlfGuiSetBackgroundFileBuffer(backgrounds_bmp + 111168, 6176, 1);
 	SetFade();
 }
 
@@ -460,34 +461,14 @@ int app_main(int argc, char *argv[]) {
 	pspGetBaryonVersion(&baryon);
 	pspGetPommelVersion(&pommel);
 	devkit = sceKernelDevkitVersion();
+	pscodeRet = pspChkregGetPsCode(&pscode);
 
 	GetRegistryValue("/CONFIG/SYSTEM/XMB", "button_assign", &button_assign, 4, 1);
 
 	vertxt = pspGetVersionTxt();
 
 	vlfGuiSystemSetup(1, 1, 1);
-	
-	int OnBackgroundPlus(void *param) {
-		background_number++;
-		battery_fade_ctrl = 1;
-		SetBackground();
 
-		return VLF_EV_RET_NOTHING;
-	}
-
-	int OnBackgroundMinus(void *param) {
-		background_number--;
-		battery_fade_ctrl = 1;
-		SetBackground();
-
-		return VLF_EV_RET_NOTHING;
-	}
-	
-	vlfGuiAddEventHandler(PSP_CTRL_RTRIGGER, -1, OnBackgroundPlus, NULL);
-	vlfGuiAddEventHandler(PSP_CTRL_LTRIGGER, -1, OnBackgroundMinus, NULL);
-
-	max_background_number = size_backgrounds_bmp / 6176 - 1;
-	background_number = Random(0, max_background_number);
 	SetBackground();
 
 	MainMenu(0);
