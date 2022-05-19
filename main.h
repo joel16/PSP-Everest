@@ -3,7 +3,7 @@
 
 #include "vlf.h"
 
-int psp_model, devkit, language;
-u32 tachyon, baryon, pommel;
+extern int psp_model, devkit, language;
+extern u32 tachyon, baryon, pommel;
 
 #endif

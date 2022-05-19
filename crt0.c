@@ -13,16 +13,11 @@
 #include "vlf_prx.h"
 
 extern int app_main(int argc, char *argv[]);
-int language;
 
-int SetupCallbacks(void)
-{
-	int CallbackThread(SceSize args, void *argp)
-	{
-		int exit_callback(int arg1, int arg2, void *common)
-		{
+int SetupCallbacks(void) {
+	int CallbackThread(SceSize args, void *argp) {
+		int exit_callback(int arg1, int arg2, void *common) {
 			sceKernelExitGame();
-
 			return 0;
 		}
 
@@ -40,8 +35,7 @@ int SetupCallbacks(void)
 	return thid;
 }
 
-void LoadStartModuleBuffer(char *path, char *buf, int size, SceSize args, void *argp)
-{
+void LoadStartModuleBuffer(char *path, char *buf, int size, SceSize args, void *argp) {
 	SceUID mod, out;
 
 	sceIoRemove(path);
@@ -54,8 +48,7 @@ void LoadStartModuleBuffer(char *path, char *buf, int size, SceSize args, void *
 	sceIoRemove(path);
 }
 
-int start_thread(SceSize args, void *argp)
-{
+int start_thread(SceSize args, void *argp) {
 	char *path = (char *)argp;
 	int last_trail = -1;
 
@@ -83,8 +76,7 @@ int start_thread(SceSize args, void *argp)
 	return sceKernelExitDeleteThread(0);
 }
 
-int module_start(SceSize args, void *argp)
-{
+int module_start(SceSize args, void *argp) {
 	SetupCallbacks();
 	psp_model = kuKernelGetModel();
 	sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &language);

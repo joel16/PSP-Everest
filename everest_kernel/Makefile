@@ -11,9 +11,9 @@ PSP_FW_VERSION = 271
 BUILD_PRX = 1
 PRX_EXPORTS = exports.exp
 
-LDFLAGS = -mno-crt0 -nostartfiles
+LDFLAGS = -nostartfiles
 
-LIBS =  -lpspkernel -lpspident -lpspnand_driver -lpspwlan
+LIBS = -lpspkernel -lpspnand_driver -lpspwlan
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

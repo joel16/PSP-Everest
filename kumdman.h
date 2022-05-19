@@ -19,7 +19,7 @@ ATAPI_INQURIY ai;
 u8 buf[0x38];
 u8 param[4] = { 0, 0, 0x38, 0 };
 
-void *_sceUmdManGetUmdDrive(int driveNum);
-int _sceUmdExecInquiryCmd(void *drive, u8 *param, u8 *buf);
+void *pspUmdManGetUmdDrive(int driveNum);
+int pspUmdExecInquiryCmd(void *drive, u8 *param, u8 *buf);
 
 #endif

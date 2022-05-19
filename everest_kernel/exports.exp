@@ -6,22 +6,22 @@ PSP_BEGIN_EXPORTS
 	PSP_EXPORT_END
 
 	PSP_EXPORT_START(everest_kernel, 0, 0x4001)
-		PSP_EXPORT_FUNC_HASH(sceSysconGetBaryonVersion)
-		PSP_EXPORT_FUNC_HASH(sceSysconGetPommelVersion)
-		PSP_EXPORT_FUNC_HASH(sceSysregGetTachyonVersion)
-		PSP_EXPORT_FUNC_HASH(sceSysregGetFuseId)
-		PSP_EXPORT_FUNC_HASH(sceSysregGetFuseConfig)
+		PSP_EXPORT_FUNC_HASH(pspGetBaryonVersion)
+		PSP_EXPORT_FUNC_HASH(pspGetPommelVersion)
+		PSP_EXPORT_FUNC_HASH(pspGetTachyonVersion)
+		PSP_EXPORT_FUNC_HASH(pspGetFuseId)
+		PSP_EXPORT_FUNC_HASH(pspGetFuseConfig)
 		PSP_EXPORT_FUNC_HASH(pspGetKirkVersion)
 		PSP_EXPORT_FUNC_HASH(pspGetSpockVersion)
 		PSP_EXPORT_FUNC_HASH(pspNandGetScramble)
-		PSP_EXPORT_FUNC_HASH(GetRegion)
-		PSP_EXPORT_FUNC_HASH(GetInitialFW)
+		PSP_EXPORT_FUNC_HASH(pspGetRegion)
+		PSP_EXPORT_FUNC_HASH(pspGetInitialFW)
 		PSP_EXPORT_FUNC_HASH(pspNandGetPageSize)
 		PSP_EXPORT_FUNC_HASH(pspNandGetPagesPerBlock)
 		PSP_EXPORT_FUNC_HASH(pspNandGetTotalBlocks)
-		PSP_EXPORT_FUNC_HASH(GetMACAddress)
-		PSP_EXPORT_FUNC_HASH(WriteSerial)
-		PSP_EXPORT_FUNC_HASH(ReadSerial)
+		PSP_EXPORT_FUNC_HASH(pspGetMACAddress)
+		PSP_EXPORT_FUNC_HASH(pspWriteSerial)
+		PSP_EXPORT_FUNC_HASH(pspReadSerial)
 	PSP_EXPORT_END
 
 PSP_END_EXPORTS
