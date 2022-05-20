@@ -35,7 +35,7 @@ PSP_MAIN_THREAD_ATTR(0);
 VlfText main_menu[NUM_DEL_ITEMS_MAIN], text_hardware[NUM_DEL_ITEMS_HARDWARE], text_battery[NUM_DEL_ITEMS_BATTERY], text_system[NUM_DEL_ITEMS_SYSTEM], title_text;
 VlfPicture title_pic, pic_button_assign;
 
-static int battery_break = 0, battery_fade_ctrl = 0, focus = 0;
+static int battery_break = 0, battery_fade_ctrl = 0, background_number = 0, max_background_number = 0, focus = 0;
 static unsigned int button_assign = 0;
 static char initial_fw[8], kirk[4], spock[4];
 static u32 fusecfg = 0, scramble = 0;
@@ -335,7 +335,7 @@ void SetTitle(char *text) {
         
     title_text = pspEverestPrintf(30, 1, text);
     title_pic = vlfGuiAddPictureResource("ps3scan_plugin.rco", "tex_infobar_icon", 4, -2);
-    vlfGuiSetTitleBarEx(title_text, title_pic, 1, 0, 18);
+    vlfGuiSetTitleBarEx(title_text, title_pic, 1, 0, background_number);
 }
 
 void SetFade(void) {
@@ -437,10 +437,12 @@ void MainMenu(int select) {
 }
 
 void SetBackground(void) {
-    if (!size_backgrounds_bmp)
-        return;
-    
-    vlfGuiSetBackgroundFileBuffer(backgrounds_bmp + 111168, 6176, 1);
+    if (background_number < 0)
+        background_number = max_background_number;
+    else if (background_number > max_background_number)
+        background_number = 0;
+        
+    vlfGuiSetBackgroundFileBuffer(backgrounds_bmp + background_number * 6176, 6176, 1);
     SetFade();
 }
 
@@ -468,6 +470,27 @@ int app_main(int argc, char *argv[]) {
     vertxt = pspGetVersionTxt();
     
     vlfGuiSystemSetup(1, 1, 1);
+    
+    int OnBackgroundPlus(void *param) {
+        background_number++;
+        battery_fade_ctrl = 1;
+        SetBackground();
+        return VLF_EV_RET_NOTHING;
+    }
+    
+    int OnBackgroundMinus(void *param) {
+        background_number--;
+        battery_fade_ctrl = 1;
+        SetBackground();
+        return VLF_EV_RET_NOTHING;
+    }
+    
+    vlfGuiAddEventHandler(PSP_CTRL_RTRIGGER, -1, OnBackgroundPlus, NULL);
+    vlfGuiAddEventHandler(PSP_CTRL_LTRIGGER, -1, OnBackgroundMinus, NULL);
+    
+    max_background_number = size_backgrounds_bmp / 6176 - 1;
+    background_number = Random(0, max_background_number);
+    
     SetBackground();
     MainMenu(0);
     
