@@ -112,7 +112,7 @@ VlfText pspEverestPrintf(int x, int y, const char *text, ...) {
     char ascii[256], unicode[256];
     va_list list;
     va_start(list, text);
-    vsprintf(ascii, text, list);
+    vsnprintf(ascii, 256, text, list);
     va_end(list);
     ascii2unicode(unicode, ascii);
     return vlfGuiAddTextW(x, y, (u16 *)unicode);
