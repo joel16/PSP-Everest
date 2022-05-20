@@ -9,7 +9,7 @@
 #include "translate.h"
 
 int sctrlHENGetMinorVersion();
-static char get_firmware_buf[256], version_txt_buf[256];
+static char get_firmware_buf[22], version_txt_buf[256];
 
 char *pspGetFirmwareName(void) {
     char *cfwname = "";
@@ -95,7 +95,7 @@ char *pspGetFirmwareName(void) {
     }
     
     char *devkit_chr = (char *)&devkit;
-    sprintf(get_firmware_buf, "%i.%i%i %s", devkit_chr[3], devkit_chr[2], devkit_chr[1], cfwname);
+    snprintf(get_firmware_buf, 22, "%i.%i%i %s", devkit_chr[3], devkit_chr[2], devkit_chr[1], cfwname);
     return get_firmware_buf;
 }
 

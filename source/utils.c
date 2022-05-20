@@ -18,7 +18,7 @@ int GetRegistryValue(const char *dir, const char *name, void *buf, int bufsize, 
     reg.namelen = strlen("/system");
     reg.unk2 = 1;
     reg.unk3 = 1;
-    strcpy(reg.name, "/system");
+    strncpy(reg.name, "/system", 8);
     
     if (sceRegOpenRegistry(&reg, 2, &h) == 0) {
         REGHANDLE hd;

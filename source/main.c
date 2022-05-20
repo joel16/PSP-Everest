@@ -285,8 +285,8 @@ void SystemInfo(void) {
     
     text_system[0] = pspEverestPrintf(10, 40, trans->system.fw, pspGetFirmwareName());
     text_system[1] = pspEverestPrintf(10, 60, trans->system.button_assign);
-    text_system[2] = pspEverestPrintf(10, 80, "Company code: 0x%02X", pscode.companyCode);
-    text_system[3] = pspEverestPrintf(10, 100, "Product sub code: 0x%02X", pscode.productSubCode);
+    text_system[2] = pspEverestPrintf(10, 80, "Company code: %d", pscode.companyCode);
+    text_system[3] = pspEverestPrintf(10, 100, "Factory code: %d", pscode.factoryCode);
     
     if (button_assign)
         pic_button_assign = vlfGuiAddPictureResource("system_plugin_fg.rco", "tex_cross", 4, -2);
@@ -301,8 +301,8 @@ void SystemInfo(void) {
     text_system[4] = pspEverestPrintf(237, 40, trans->system.username);
     text_system[5] = vlfGuiAddTextW(language == PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN ? 337 : 327, 40, (u16 *)unicode_username);
     text_system[6] = pspEverestPrintf(237, 60, trans->system.password, GetRegistryValue("/CONFIG/SYSTEM/LOCK", "password", &password, sizeof(password), 0));
-    text_system[7] = pspEverestPrintf(237, 80, "Product code: 0x%02X", pscode.productCode);
-    text_system[8] = pspEverestPrintf(237, 100, "Factory code: %d", pscode.factoryCode);
+    text_system[7] = pspEverestPrintf(237, 80, "Product code: 0x%04X", pscode.productCode);
+    text_system[8] = pspEverestPrintf(237, 100, "Product sub code: 0x%04X", pscode.productSubCode);
     
     text_system[9] = pspEverestPrintf(10, 130, "version.txt:");
     if (vertxt != NULL)
@@ -437,6 +437,9 @@ void MainMenu(int select) {
 }
 
 void SetBackground(void) {
+    if (!size_backgrounds_bmp)
+        return;
+    
     vlfGuiSetBackgroundFileBuffer(backgrounds_bmp + 111168, 6176, 1);
     SetFade();
 }

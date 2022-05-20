@@ -14,6 +14,7 @@ static char macbuf[256];
 ATAPI_INQURIY ai;
 u8 buf[0x38];
 u8 param[4] = { 0, 0, 0x38, 0 };
+char outtxt[20];
 
 int pspGetFirstSymbolOfModel(void) {
     switch(psp_model + 1) {
@@ -117,14 +118,14 @@ char *pspGetUMDFWText(void) {
     pspUmdExecInquiryCmd(pspUmdManGetUmdDrive(0), param, buf);
     memset(outtxt, 0, sizeof(outtxt));
     memcpy(&ai, buf, sizeof(ATAPI_INQURIY));
-    strncpy(outtxt, ai.sony_spec, 5);
+    strncpy(outtxt, ai.sony_spec, 20);
     return outtxt;
 }
 
 char *pspGetMacAddressText(void) {
-    u8 macaddr[512];
+    u8 macaddr[18];
     pspGetMACAddress(macaddr);
-    sprintf(macbuf, "%02X:%02X:%02X:%02X:%02X:%02X", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
+    snprintf(macbuf, 18, "%02X:%02X:%02X:%02X:%02X:%02X", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
     return macbuf;
 }
 

@@ -1,7 +1,8 @@
 #ifndef ___KUMDMAN_H___
 #define ___KUMDMAN_H___
 
-static char outtxt[0x12]; 
+extern char outtxt[20];
+
 typedef struct {
     unsigned char peripheral_device_type;
     unsigned char removable;
