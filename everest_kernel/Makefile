@@ -1,7 +1,7 @@
 TARGET = everest_kernel
 OBJS = main.o imports.o
 
-INCDIR = ../include ../libs/include
+INCDIR = ../include ../libs/include ../
 CFLAGS = -O2 -G0 -Wall -fno-pic
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
