@@ -1,12 +1,10 @@
 TARGET = everest_kernel
 OBJS = main.o imports.o
 
-INCDIR = ../include ../libs/include ../
+INCDIR = ../include ../libs/include
 CFLAGS = -O2 -G0 -Wall -fno-pic
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
-
-PSP_FW_VERSION = 271
 
 BUILD_PRX = 1
 PRX_EXPORTS = exports.exp

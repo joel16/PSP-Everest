@@ -1,5 +1,6 @@
 TARGET = EVEREST
-OBJS = crt0.o main.o utils.o hardware_utils.o system_utils.o translate.o imports.o everest_kernel/everest_kernel.o kumdman/pspUmdMan_driver.o
+OBJS = source/crt0.o source/main.o source/utils.o source/hardware_utils.o source/system_utils.o \
+    source/translate.o source/imports.o everest_kernel/everest_kernel.o kumdman/pspUmdMan_driver.o
 
 INCDIR = libs/include include
 CFLAGS = -O2 -G0 -Wall -fshort-wchar -fno-pic -mno-check-zero-division 
@@ -11,8 +12,6 @@ LDFLAGS = -nostdlib -nodefaultlibs
 LIBDIR  = libs/lib
 STDLIBS = -lpspmodinfo -lpsprtc -lvlfgui -lvlfgu -lvlfutils -lvlflibc -lpsppower -lpspkubridge
 LIBS = $(STDLIBS) -lpspreg
-
-PSP_FW_VERSION = 271
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = PSP EVEREST 2 Rev6
