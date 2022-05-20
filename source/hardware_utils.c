@@ -9,12 +9,12 @@
 #include "translate.h"
 #include "kumdman.h"
 
-static char macbuf[256];
+static char macbuf[18];
 
 ATAPI_INQURIY ai;
 u8 buf[0x38];
 u8 param[4] = { 0, 0, 0x38, 0 };
-char outtxt[20];
+char outtxt[0x12];
 
 int pspGetFirstSymbolOfModel(void) {
     switch(psp_model + 1) {
@@ -118,7 +118,7 @@ char *pspGetUMDFWText(void) {
     pspUmdExecInquiryCmd(pspUmdManGetUmdDrive(0), param, buf);
     memset(outtxt, 0, sizeof(outtxt));
     memcpy(&ai, buf, sizeof(ATAPI_INQURIY));
-    strncpy(outtxt, ai.sony_spec, 20);
+    snprintf(outtxt, 5, ai.sony_spec);
     return outtxt;
 }
 
