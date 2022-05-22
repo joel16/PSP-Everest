@@ -66,13 +66,15 @@ typedef struct {
     u8 hash[0x10]; // 168
 } SceIdStorageConsoleIdCertificate; // size = 184
 
-u32 sceSysconGetBaryonVersion(u32 *baryon); // Baryon
-u32 sceSysconGetPommelVersion(u32 *pommel); // Pommel
+u32 sceSysconGetBaryonVersion(u32 *baryon);
+u32 sceSysconGetPommelVersion(u32 *pommel);
 u64 sceSysreg_driver_4F46EEDE(void);        // FuseId
 u32 sceSysreg_driver_8F4F4E96(void);        // FuseCfg
 int sceSysregKirkBusClockEnable(void);      // Kirk
 int sceSysregAtaBusClockEnable(void);       // Spock
 u32 sceSysconCmdExec(void *param, int unk);
+int sceSysconBatteryGetElec(int *elec);
+int sceSyscon_driver_4C539345(int *elec);   // sceSysconBatteryGetTotalElec
 static int (*sceUtilsBufferCopyWithRange)(u8 *outbuff, int outsize, u8 *inbuff, int insize, int cmd);
 
 static SceIdStorageConsoleIdCertificate g_ConsoleIdCertificate;
@@ -368,6 +370,20 @@ int pspChkregGetPsCode(ScePsCode *pPsCode) {
         pPsCode->factoryCode = g_ConsoleIdCertificate.consoleId.factoryCode;
     }
     
+    return ret;
+}
+
+int pspSysconBatteryGetElec(int *elec) {
+    int k1 = pspSdkSetK1(0);
+    int ret = sceSysconBatteryGetElec(elec);
+    pspSdkSetK1(k1);
+    return ret;
+}
+
+int pspSysconBatteryGetTotalElec(int *elec) {
+    int k1 = pspSdkSetK1(0);
+    int ret = sceSyscon_driver_4C539345(elec);
+    pspSdkSetK1(k1);
     return ret;
 }
 

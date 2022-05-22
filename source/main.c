@@ -26,7 +26,7 @@ PSP_MAIN_THREAD_ATTR(0);
 
 #define NUM_DEL_ITEMS_MAIN 4
 #define NUM_DEL_ITEMS_HARDWARE 18
-#define NUM_DEL_ITEMS_BATTERY 12
+#define NUM_DEL_ITEMS_BATTERY 14
 #define NUM_DEL_ITEMS_SYSTEM 11
 
 #define EVE_ENTER_EN "Enter"
@@ -178,7 +178,7 @@ void HardwareInfo(void) {
 }
 
 void BatteryInfo(void) {
-    int swbt = 1, checkbt = 0;
+    int swbt = 1, checkbt = 0, elec = 0, total_elec = 0;
     
     vlfGuiCancelCentralMenu();
     
@@ -244,16 +244,18 @@ void BatteryInfo(void) {
             text_battery[3] = pspEverestPrintf(15, 130, battery_percent > 100 || battery_percent < 0 ? trans->battery.no_charge_lvl : trans->battery.charge_lvl, battery_percent);
             text_battery[4] = pspEverestPrintf(15, 150, trans->battery.charge_stat, battery_percent >= 0 && battery_percent <= 20 ? trans->battery.charge_stat_low : battery_percent > 20 && battery_percent < 70 ? trans->battery.charge_stat_normal : battery_percent >= 70 && battery_percent <= 100 ? trans->battery.charge_stat_strong : "-");
             text_battery[5] = pspEverestPrintf(15, 170, battery_life_time < 0 || battery_life_time / 60 > 100 || (battery_life_time / 60 == 0 && battery_life_time - (battery_life_time / 60 * 60) == 0) ? trans->battery.no_left_time : trans->battery.left_time, battery_life_time / 60, battery_life_time - (battery_life_time / 60 * 60));
+            text_battery[6] = pspEverestPrintf(15, 190, pspSysconBatteryGetElec(&elec) < 0? "Elec Charge: -" : "Elec Charge: %d", elec);
             
-            text_battery[6] = pspEverestPrintf(240, 70, scePowerGetBatteryVolt() <= 0 ? trans->battery.no_voltage : trans->battery.voltage, (float)scePowerGetBatteryVolt() / 1000.0);
-            text_battery[7] = pspEverestPrintf(240, 90, scePowerGetBatteryTemp() <= 0 ? trans->battery.no_temperature : trans->battery.temperature, scePowerGetBatteryTemp());
-            text_battery[8] = pspEverestPrintf(240, 110, scePowerGetBatteryRemainCapacity() <= 0 ? trans->battery.no_remain_capacity : trans->battery.remain_capacity, scePowerGetBatteryRemainCapacity());
-            text_battery[9] = pspEverestPrintf(240, 130, scePowerGetBatteryFullCapacity() <= 0 ? trans->battery.no_total_capacity : trans->battery.total_capacity, scePowerGetBatteryFullCapacity());
-            text_battery[10] = pspEverestPrintf(240, 150, scePowerIsBatteryExist() && (psp_model == 0 || (tachyon == 0x00500000 && baryon == 0x0022B200)) && checkbt ? trans->battery.serial : trans->battery.no_serial, bserialdata[0], bserialdata[1]);	
-            text_battery[11] = pspEverestPrintf(240, 170, trans->battery.mode, 
+            text_battery[7] = pspEverestPrintf(240, 70, scePowerGetBatteryVolt() <= 0 ? trans->battery.no_voltage : trans->battery.voltage, (float)scePowerGetBatteryVolt() / 1000.0);
+            text_battery[8] = pspEverestPrintf(240, 90, scePowerGetBatteryTemp() <= 0 ? trans->battery.no_temperature : trans->battery.temperature, scePowerGetBatteryTemp());
+            text_battery[9] = pspEverestPrintf(240, 110, scePowerGetBatteryRemainCapacity() <= 0 ? trans->battery.no_remain_capacity : trans->battery.remain_capacity, scePowerGetBatteryRemainCapacity());
+            text_battery[10] = pspEverestPrintf(240, 130, scePowerGetBatteryFullCapacity() <= 0 ? trans->battery.no_total_capacity : trans->battery.total_capacity, scePowerGetBatteryFullCapacity());
+            text_battery[11] = pspEverestPrintf(240, 150, scePowerIsBatteryExist() && (psp_model == 0 || (tachyon == 0x00500000 && baryon == 0x0022B200)) && checkbt ? trans->battery.serial : trans->battery.no_serial, bserialdata[0], bserialdata[1]);	
+            text_battery[12] = pspEverestPrintf(240, 170, trans->battery.mode, 
                 checkbt && scePowerIsBatteryExist() && bserialdata[0] == 0xFFFF && bserialdata[1] == 0xFFFF && (psp_model == 0 || (tachyon <= 0x00500000 && baryon == 0x0022B200)) ? trans->battery.mode_service :
                 checkbt && scePowerIsBatteryExist() && bserialdata[0] == 0x0000 && bserialdata[1] == 0x0000 && (psp_model == 0 || (tachyon <= 0x00500000 && baryon == 0x0022B200)) ? trans->battery.mode_autoboot :
                 checkbt && scePowerIsBatteryExist() && (psp_model == 0 || (tachyon <= 0x00500000 && baryon == 0x0022B200)) ? trans->battery.mode_default : "-");
+            text_battery[13] = pspEverestPrintf(240, 190, pspSysconBatteryGetTotalElec(&total_elec) < 0? "Total Elec Charge: -" : "Total Elec Charge: %d", total_elec);
         }
         
         if (!update) {

@@ -33,5 +33,7 @@ u8 *pspGetMACAddress(u8 *buf);
 int pspReadSerial(u16 *pdata);
 int pspWriteSerial(u16* serial);
 int pspChkregGetPsCode(ScePsCode *pPsCode);
+int pspSysconBatteryGetElec(int *elec);
+int pspSysconBatteryGetTotalElec(int *elec);
 
 #endif
