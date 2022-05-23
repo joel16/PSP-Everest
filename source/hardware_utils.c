@@ -39,7 +39,7 @@ int pspGetFirstSymbolOfModel(void) {
     return -1;
 }
 
-char *pspGetRegionName(void) {
+const char *pspGetRegionName(void) {
     int region = pspGetRegion();
     
     if (region >= 0 && region < 11)
@@ -129,7 +129,7 @@ char *pspGetMacAddressText(void) {
     return macbuf;
 }
 
-char *pspGetModelName(void) {
-    char *models[] = { "PSP Fat", "PSP Slim", "PSP Brite", "PSP Brite", "PSPgo", "-", "PSP Brite", "-", "PSP Brite", "-", "PSP Street" };
+const char *pspGetModelName(void) {
+    const char *models[] = { "PSP Fat", "PSP Slim", "PSP Brite", "PSP Brite", "PSPgo", "-", "PSP Brite", "-", "PSP Brite", "-", "PSP Street" };
     return models[psp_model];
 }

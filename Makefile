@@ -1,6 +1,7 @@
 TARGET = EVEREST
 OBJS = source/crt0.o source/main.o source/utils.o source/hardware_utils.o source/system_utils.o \
-    source/translate.o source/imports.o everest_kernel/everest_kernel.o kumdman/pspUmdMan_driver.o
+    source/consoleid_utils.o source/translate.o source/imports.o everest_kernel/everest_kernel.o \
+    kumdman/pspUmdMan_driver.o
 
 INCDIR = libs/include include
 CFLAGS = -O2 -G0 -Wall -fshort-wchar -fno-pic -mno-check-zero-division 

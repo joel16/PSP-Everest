@@ -1,15 +1,16 @@
 //>>> PSP_EVEREST 2
-//Copyright(C) 2011, frostegater
+//Copyright(C) 2022, frostegater, Joel16
 
-#include <pspsdk.h>
-#include <pspkernel.h>
+#include <pspctrl.h>
 #include <pspidstorage.h>
+#include <pspkernel.h>
+#include <psppower.h>
+#include <pspsdk.h>
+#include <psputility_sysparam.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <pspctrl.h>
-#include <psppower.h>
-#include <stdarg.h>
-#include <psputility_sysparam.h>
 
 #include "main.h"
 #include "vlf.h"
@@ -18,24 +19,28 @@
 #include "everest_kernel.h"
 #include "hardware_utils.h"
 #include "system_utils.h"
+#include "consoleid_utils.h"
 
 #include "translate.h"
 
 PSP_MODULE_INFO("PSP_EVEREST", 0, 2, 0);
 PSP_MAIN_THREAD_ATTR(0);
 
-#define NUM_DEL_ITEMS_MAIN 4
-#define NUM_DEL_ITEMS_HARDWARE 18
-#define NUM_DEL_ITEMS_BATTERY 14
-#define NUM_DEL_ITEMS_SYSTEM 11
+#define NUM_DEL_ITEMS_MAIN      5
+#define NUM_DEL_ITEMS_HARDWARE  18
+#define NUM_DEL_ITEMS_BATTERY   14
+#define NUM_DEL_ITEMS_SYSTEM    7
+#define NUM_DEL_ITEMS_CONSOLEID 7
 
 #define EVE_ENTER_EN "Enter"
 #define EVE_BACK_EN "Back"
 
-VlfText main_menu[NUM_DEL_ITEMS_MAIN], text_hardware[NUM_DEL_ITEMS_HARDWARE], text_battery[NUM_DEL_ITEMS_BATTERY], text_system[NUM_DEL_ITEMS_SYSTEM], title_text;
+VlfText main_menu[NUM_DEL_ITEMS_MAIN], text_hardware[NUM_DEL_ITEMS_HARDWARE], text_battery[NUM_DEL_ITEMS_BATTERY],
+    text_system[NUM_DEL_ITEMS_SYSTEM], text_consoleId[NUM_DEL_ITEMS_SYSTEM], title_text;
 VlfPicture title_pic, pic_button_assign;
 
-static int battery_break = 0, battery_fade_ctrl = 0, background_number = 0, max_background_number = 0, focus = 0;
+static int background_number = 0, max_background_number = 0;
+static bool battery_break = false, battery_fade_ctrl = false;
 static unsigned int button_assign = 0;
 static char initial_fw[8], kirk[4], spock[4];
 static u32 fusecfg = 0, scramble = 0;
@@ -47,54 +52,46 @@ static char *vertxt = NULL;
 int psp_model, devkit, language;
 u32 tachyon, baryon, pommel;
 
-int scePowerGetBatteryRemainCapacity(void);
-int scePowerGetBatteryFullCapacity(void);
-
 void MainMenu(int select);
-int ExitInMainMenuHardwareInfo(int enter);
-int ExitInMainMenuBatteryInfo(int enter);
-int ExitInMainMenuSystemInfo(int enter);
-void HardwareInfo(void);
-void BatteryInfo(void);
-void SystemInfo(void);
 
-void SetBottomDialog(int enter, int back, int (* handler)(int enter), int delete_bd);
-void SetTitle(char *text);
-void SetFade(void);
-void SetBackground(void);
-
-int OnMainMenuScreenUp(void *param);
-int OnMainMenuScreenDown(void *param);
-
-int OnMainMenu(int enter) {
-    if (enter) {
-        vlfGuiRemoveEventHandler(OnMainMenuScreenUp);
-        vlfGuiRemoveEventHandler(OnMainMenuScreenDown);
-        
-        for(int i = 0; i < NUM_DEL_ITEMS_MAIN; i++)
-            vlfGuiRemoveText(main_menu[i]);
+void SetBottomDialog(int enter, int back, int (* handler)(int enter), int delete_bd) {
+    if (delete_bd) {
+        if (button_assign)
+            vlfGuiBottomDialog(back ? VLF_DI_BACK : -1, enter ? VLF_DI_ENTER : -1, 1, 0, 0, NULL);
             
-        switch(focus) {
-            case 0:
-                HardwareInfo();
-                break;
-            
-            case 1:
-                battery_break = 0;
-                BatteryInfo();
-                break;
-                
-            case 2:
-                SystemInfo();
-                break;
-                
-            case 3:
-                sceKernelExitGame();
-                break;
-        }
+        vlfGuiCancelBottomDialog();
     }
     
-    return VLF_EV_RET_NOTHING;
+    vlfGuiBottomDialog(back ? VLF_DI_BACK : -1, enter ? VLF_DI_ENTER : -1, 1, 0, VLF_DEFAULT, handler);
+}
+
+void SetTitle(const char *text) {
+    if (title_text != NULL)
+        vlfGuiRemoveText(title_text);
+        
+    if (title_pic != NULL)
+        vlfGuiRemovePicture(title_pic);
+        
+    title_text = pspEverestPrintf(30, 1, text);
+    title_pic = vlfGuiAddPictureResource("ps3scan_plugin.rco", "tex_infobar_icon", 4, -2);
+    vlfGuiSetTitleBarEx(title_text, title_pic, 1, 0, background_number);
+}
+
+void SetFade(void) {
+    if (pic_button_assign != NULL)
+        vlfGuiSetPictureFade(pic_button_assign, VLF_FADE_MODE_IN, VLF_FADE_SPEED_FAST, 0);
+        
+    vlfGuiSetRectangleFade(0, VLF_TITLEBAR_HEIGHT, 480, 272 - VLF_TITLEBAR_HEIGHT, VLF_FADE_MODE_IN, VLF_FADE_SPEED_FAST, 0, NULL, NULL, 0);
+}
+
+void SetBackground(void) {
+    if (background_number < 0)
+        background_number = max_background_number;
+    else if (background_number > max_background_number)
+        background_number = 0;
+        
+    vlfGuiSetBackgroundFileBuffer(backgrounds_bmp + background_number * 6176, 6176, 1);
+    SetFade();
 }
 
 int ExitInMainMenuHardwareInfo(int enter) {
@@ -106,7 +103,7 @@ int ExitInMainMenuHardwareInfo(int enter) {
             vlfGuiBottomDialog(-1, VLF_DI_ENTER, 1, 0, VLF_DEFAULT, NULL);
             
         vlfGuiCancelBottomDialog();
-        MainMenu(0);		
+        MainMenu(0);
     }
     
     return VLF_EV_RET_NOTHING;
@@ -114,13 +111,13 @@ int ExitInMainMenuHardwareInfo(int enter) {
 
 int ExitInMainMenuBatteryInfo(int enter) {
     if (!enter) {
-        battery_break = 1;
+        battery_break = true;
 
         if (!button_assign)
             vlfGuiBottomDialog(-1, VLF_DI_ENTER, 1, 0, VLF_DEFAULT, NULL);
             
         vlfGuiCancelBottomDialog();
-        MainMenu(1);		
+        MainMenu(1);
     }
     
     return VLF_EV_RET_NOTHING;
@@ -144,7 +141,22 @@ int ExitInMainMenuSystemInfo(int enter) {
             vlfGuiBottomDialog(-1, VLF_DI_ENTER, 1, 0, VLF_DEFAULT, NULL);
             
         vlfGuiCancelBottomDialog();
-        MainMenu(2);		
+        MainMenu(2);
+    }
+    
+    return VLF_EV_RET_NOTHING;
+}
+
+int ExitInMainMenuConsoleIdInfo(int enter) {
+    if (!enter) {
+        for(int i = 0; i < NUM_DEL_ITEMS_CONSOLEID; i++)
+            vlfGuiRemoveText(text_consoleId[i]);
+            
+        if (!button_assign)
+            vlfGuiBottomDialog(-1, VLF_DI_ENTER, 1, 0, VLF_DEFAULT, NULL);
+            
+        vlfGuiCancelBottomDialog();
+        MainMenu(3);
     }
     
     return VLF_EV_RET_NOTHING;
@@ -178,9 +190,8 @@ void HardwareInfo(void) {
 }
 
 void BatteryInfo(void) {
-    int swbt = 1, checkbt = 0, elec = 0, total_elec = 0;
-    
-    vlfGuiCancelCentralMenu();
+    bool swbt = true, checkbt = false;
+    int elec = 0, total_elec = 0;
     
     if (button_assign)
         vlfGuiBottomDialog(VLF_DI_BACK, -1, 1, 0, 0, NULL);
@@ -188,14 +199,14 @@ void BatteryInfo(void) {
     vlfGuiCancelBottomDialog();
     SetTitle(trans->battery_title);
     
-    battery_fade_ctrl = 0;
+    battery_fade_ctrl = false;
     
-    int first_cycle = 1;
+    bool first_cycle = true;
     for(int update = 0;; update++) {
         if (update == 25 || battery_fade_ctrl) {
             update = 1;
-            first_cycle = (battery_fade_ctrl ? 1 : 0);
-            battery_fade_ctrl = 0;
+            first_cycle = battery_fade_ctrl;
+            battery_fade_ctrl = false;
         }
         
         vlfGuiDrawFrame();
@@ -224,19 +235,19 @@ void BatteryInfo(void) {
                     
                 pspWriteSerial(wrbuffer);
                 
-                checkbt = 0;
+                checkbt = false;
                 pspReadSerial(serialdata);
                 
                 if (serialdata[0] == wrbuffer[0] && serialdata[1] == wrbuffer[1]) {
-                    checkbt = 1;
+                    checkbt = true;
                     pspWriteSerial(bserialdata);
                 }
                 
-                swbt = 0;
+                swbt = false;
             }
             
-            if (swbt == 0 && !scePowerIsBatteryExist())
-                swbt = 1;
+            if (!swbt && !scePowerIsBatteryExist())
+                swbt = true;
                 
             text_battery[0] = pspEverestPrintf(15, 70, trans->battery.ex_power, psp_model == 4 ? "-" : scePowerIsPowerOnline() ? trans->yes : trans->no);
             text_battery[1] = pspEverestPrintf(15, 90, trans->battery.batt_stat,  scePowerIsBatteryExist() ? trans->battery.batt_stat_present : trans->battery.batt_stat_absent);
@@ -263,6 +274,8 @@ void BatteryInfo(void) {
             SetFade();
         }
         
+        vlfGuiDrawFrame();
+
         if (battery_break) {
             for(int i = 0; i < NUM_DEL_ITEMS_BATTERY; i++) {
                 if (text_battery[i] != NULL) {
@@ -270,11 +283,9 @@ void BatteryInfo(void) {
                     text_battery[i] = NULL;
                 }
             }
-            
+
             break;
         }
-        
-        vlfGuiDrawFrame();
     }
 }
 
@@ -285,167 +296,93 @@ void SystemInfo(void) {
     
     SetTitle(trans->system_title);
     
-    text_system[0] = pspEverestPrintf(10, 40, trans->system.fw, pspGetFirmwareName());
-    text_system[1] = pspEverestPrintf(10, 60, trans->system.button_assign);
-    text_system[2] = pspEverestPrintf(10, 80, "Company code: %d", pscode.companyCode);
-    text_system[3] = pspEverestPrintf(10, 100, "Factory code: %d", pscode.factoryCode);
+    text_system[0] = pspEverestPrintf(10, 45, trans->system.fw, pspGetFirmwareName());
+    text_system[1] = pspEverestPrintf(10, 65, trans->system.button_assign);
     
     if (button_assign)
         pic_button_assign = vlfGuiAddPictureResource("system_plugin_fg.rco", "tex_cross", 4, -2);
     else
         pic_button_assign = vlfGuiAddPictureResource("system_plugin_fg.rco", "tex_circle", 4, -2);
         
-    vlfGuiSetPictureXY(pic_button_assign, 131, 63);
+    vlfGuiSetPictureXY(pic_button_assign, 131, 68);
     
     char unicode_username[26];
     utf82unicode((wchar_t *)unicode_username, (char *)GetRegistryValue("/CONFIG/SYSTEM", "owner_name", &username, sizeof(username), 0));
     
-    text_system[4] = pspEverestPrintf(237, 40, trans->system.username);
-    text_system[5] = vlfGuiAddTextW(language == PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN ? 337 : 327, 40, (u16 *)unicode_username);
-    text_system[6] = pspEverestPrintf(237, 60, trans->system.password, GetRegistryValue("/CONFIG/SYSTEM/LOCK", "password", &password, sizeof(password), 0));
-    text_system[7] = pspEverestPrintf(237, 80, "Product code: 0x%04X", pscode.productCode);
-    text_system[8] = pspEverestPrintf(237, 100, "Product sub code: 0x%04X", pscode.productSubCode);
-    
-    text_system[9] = pspEverestPrintf(10, 130, "version.txt:");
+    text_system[2] = pspEverestPrintf(237, 45, trans->system.username);
+    text_system[3] = vlfGuiAddTextW(language == PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN ? 337 : 327, 45, (u16 *)unicode_username);
+    text_system[4] = pspEverestPrintf(237, 65, trans->system.password, GetRegistryValue("/CONFIG/SYSTEM/LOCK", "password", &password, sizeof(password), 0));
+    text_system[5] = pspEverestPrintf(10, 120, "version.txt:");
+
     if (vertxt != NULL)
-        text_system[10] = vlfGuiAddTextF(10, 155, pspGetVersionTxt());
+        text_system[6] = vlfGuiAddTextF(10, 143, pspGetVersionTxt());
     else
-        text_system[10] = pspEverestPrintf(10, 155, trans->system.vertxterr);
+        text_system[6] = pspEverestPrintf(10, 143, trans->system.vertxterr);
         
-    vlfGuiSetTextFontSize(text_system[10], 0.75f);
+    vlfGuiSetTextFontSize(text_system[6], 0.75f);
     SetBottomDialog(0, 1, ExitInMainMenuSystemInfo, 1);
     SetFade();
 }
 
-void SetBottomDialog(int enter, int back, int (* handler)(int enter), int delete_bd) {
-    if (delete_bd) {
-        if (button_assign)
-            vlfGuiBottomDialog(back ? VLF_DI_BACK : -1, enter ? VLF_DI_ENTER : -1, 1, 0, 0, NULL);
-            
-        vlfGuiCancelBottomDialog();
-    }
-    
-    vlfGuiBottomDialog(back ? VLF_DI_BACK : -1, enter ? VLF_DI_ENTER : -1, 1, 0, VLF_DEFAULT, handler);
+void ConsoleIdInfo(void) {
+    text_consoleId[0] = pspEverestPrintf(10, 70, "Company Code: %d", pscode.companyCode);
+    text_consoleId[1] = pspEverestPrintf(10, 90, "Factory Code: %d", pscode.factoryCode);
+    text_consoleId[2] = pspEverestPrintf(237, 70, "Product Code: 0x%04X", pscode.productCode);
+    text_consoleId[3] = pspEverestPrintf(237, 90, "Product Sub Code: 0x%04X", pscode.productSubCode);
+
+    text_consoleId[4] = pspEverestPrintf(10, 120, "Product: %s", pspGetProductCodeInfo(pscode.productCode));
+    text_consoleId[5] = pspEverestPrintf(10, 140, "Product Sub: %s", pspGetProductSubCodeInfo(pscode.productSubCode));
+    text_consoleId[6] = pspEverestPrintf(10, 160, "Factory: %s", pspGetFactoryCodeInfo(pscode.factoryCode));
+
+    vlfGuiSetTextFontSize(text_consoleId[6], 0.75f);
+    SetBottomDialog(0, 1, ExitInMainMenuConsoleIdInfo, 1);
+    SetFade();
 }
 
-void SetTitle(char *text) {
-    if (title_text != NULL)
-        vlfGuiRemoveText(title_text);
-        
-    if (title_pic != NULL)
-        vlfGuiRemovePicture(title_pic);
-        
-    title_text = pspEverestPrintf(30, 1, text);
-    title_pic = vlfGuiAddPictureResource("ps3scan_plugin.rco", "tex_infobar_icon", 4, -2);
-    vlfGuiSetTitleBarEx(title_text, title_pic, 1, 0, background_number);
-}
-
-void SetFade(void) {
-    if (pic_button_assign != NULL)
-        vlfGuiSetPictureFade(pic_button_assign, VLF_FADE_MODE_IN, VLF_FADE_SPEED_FAST, 0);
-        
-    vlfGuiSetRectangleFade(0, VLF_TITLEBAR_HEIGHT, 480, 272 - VLF_TITLEBAR_HEIGHT, VLF_FADE_MODE_IN, VLF_FADE_SPEED_FAST, 0, NULL, NULL, 0);
-}
-
-int OnMainMenuScreenUp(void *param) {
-    switch(focus) {
-        case 1:
-            focus = 0;
-            vlfGuiRemoveTextFocus(main_menu[1], 1);
-            vlfGuiSetTextFocus(main_menu[0]);
-            break;
-            
-        case 2:
-            focus = 1;
-            vlfGuiRemoveTextFocus(main_menu[2], 1);
-            vlfGuiSetTextFocus(main_menu[1]);
-            break;
-            
-        case 3:
-            focus = 2;
-            vlfGuiRemoveTextFocus(main_menu[3], 1);
-            vlfGuiSetTextFocus(main_menu[2]);
-            break;
-            
-        default:
-            focus = 3;
-            vlfGuiRemoveTextFocus(main_menu[0], 1);
-            vlfGuiSetTextFocus(main_menu[3]);
-            break;
-    }
-    
-    return VLF_EV_RET_NOTHING;
-}
-
-int OnMainMenuScreenDown(void *param) {
-    switch(focus) {
+int OnMainMenu(int select) {
+    switch(select) {
         case 0:
-            focus = 1;
-            vlfGuiRemoveTextFocus(main_menu[0], 1);
-            vlfGuiSetTextFocus(main_menu[1]);
+            vlfGuiCancelCentralMenu();
+            HardwareInfo();
             break;
-            
+        
         case 1:
-            focus = 2;
-            vlfGuiRemoveTextFocus(main_menu[1], 1);
-            vlfGuiSetTextFocus(main_menu[2]);
+            vlfGuiCancelCentralMenu();
+            battery_break = false;
+            BatteryInfo();
             break;
-            
+
         case 2:
-            focus = 3;
-            vlfGuiRemoveTextFocus(main_menu[2], 1);
-            vlfGuiSetTextFocus(main_menu[3]);
+            vlfGuiCancelCentralMenu();
+            SystemInfo();
             break;
-            
-        default:
-            focus = 0;
-            vlfGuiRemoveTextFocus(main_menu[3], 1);
-            vlfGuiSetTextFocus(main_menu[0]);
+
+        case 3:
+            vlfGuiCancelCentralMenu();
+            ConsoleIdInfo();
+            break;
+
+        case 4:
+            sceKernelExitGame();
             break;
     }
-    
+
     return VLF_EV_RET_NOTHING;
 }
 
 void MainMenu(int select) {
-    SetTitle("PSP EVEREST 2");
-    SetBottomDialog(1, 0, OnMainMenu, 0);
+    SetTitle("PSP EVEREST 2 Rev 6");
     
-    focus = select;
-    int main_x[4], main_y[4];
-    
-    if (language == PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN) {
-        main_x[0] = 143; main_y[0] = 85;
-        main_x[1] = 141; main_y[1] = 107;
-        main_x[2] = 140; main_y[2] = 129;
-        main_x[3] = 207; main_y[3] = 151;
-    }
-    else {
-        main_x[0] = 143; main_y[0] = 85;
-        main_x[1] = 151; main_y[1] = 107;
-        main_x[2] = 151; main_y[2] = 129;
-        main_x[3] = 212; main_y[3] = 151;
-    }
-    
-    main_menu[0] = pspEverestPrintf(main_x[0], main_y[0], trans->hardware_title);
-    main_menu[1] = pspEverestPrintf(main_x[1], main_y[1], trans->battery_title);
-    main_menu[2] = pspEverestPrintf(main_x[2], main_y[2], trans->system_title);
-    main_menu[3] = pspEverestPrintf(main_x[3], main_y[3], trans->exit);
-    
-    vlfGuiSetTextFocus(main_menu[select]);
-    vlfGuiAddEventHandler(PSP_CTRL_UP, 0, OnMainMenuScreenUp, NULL);
-    vlfGuiAddEventHandler(PSP_CTRL_DOWN, 0, OnMainMenuScreenDown, NULL);
-    SetFade();
-}
+    char *main_menu_items[] = {
+        "Hardware Information",
+        "Battery Information",
+        "Software Information",
+        "Console ID Information",
+        "Exit"
+    };
 
-void SetBackground(void) {
-    if (background_number < 0)
-        background_number = max_background_number;
-    else if (background_number > max_background_number)
-        background_number = 0;
-        
-    vlfGuiSetBackgroundFileBuffer(backgrounds_bmp + background_number * 6176, 6176, 1);
-    SetFade();
+    vlfGuiCentralMenu(NUM_DEL_ITEMS_MAIN, main_menu_items, select, OnMainMenu, 0, 0);
+    SetBottomDialog(1, 0, OnMainMenu, 0);
 }
 
 int app_main(int argc, char *argv[]) {
@@ -475,14 +412,14 @@ int app_main(int argc, char *argv[]) {
     
     int OnBackgroundPlus(void *param) {
         background_number++;
-        battery_fade_ctrl = 1;
+        battery_fade_ctrl = true;
         SetBackground();
         return VLF_EV_RET_NOTHING;
     }
     
     int OnBackgroundMinus(void *param) {
         background_number--;
-        battery_fade_ctrl = 1;
+        battery_fade_ctrl = true;
         SetBackground();
         return VLF_EV_RET_NOTHING;
     }

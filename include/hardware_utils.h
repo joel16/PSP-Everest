@@ -2,10 +2,10 @@
 #define ___HARDWARE_UTILS_H___
 
 int pspGetFirstSymbolOfModel(void);
-char *pspGetRegionName(void);
+const char *pspGetRegionName(void);
 char *pspGetMoBoName(void);
 char *pspGetUMDFWText(void);
 char *pspGetMacAddressText(void);
-char *pspGetModelName(void);
+const char *pspGetModelName(void);
 
 #endif
