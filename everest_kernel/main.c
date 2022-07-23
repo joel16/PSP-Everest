@@ -66,15 +66,16 @@ typedef struct {
     u8 hash[0x10]; // 168
 } SceIdStorageConsoleIdCertificate; // size = 184
 
-u32 sceSysconGetBaryonVersion(u32 *baryon);
-u32 sceSysconGetPommelVersion(u32 *pommel);
-u64 sceSysreg_driver_4F46EEDE(void);        // FuseId
-u32 sceSysreg_driver_8F4F4E96(void);        // FuseCfg
-int sceSysregKirkBusClockEnable(void);      // Kirk
-int sceSysregAtaBusClockEnable(void);       // Spock
+s32 sceSysconGetBaryonVersion(s32 *baryon);
+s32 sceSysconGetPommelVersion(s32 *pommel);
+s32 sceSyscon_driver_FB148FB6(s32 *polestar); // sceSysconGetPolestarVersion
+u64 sceSysreg_driver_4F46EEDE(void);          // sceSysregGetFuseId
+u32 sceSysreg_driver_8F4F4E96(void);          // sceSysregGetFuseConfig
+int sceSysregKirkBusClockEnable(void);
+int sceSysregAtaBusClockEnable(void);
 u32 sceSysconCmdExec(void *param, int unk);
 int sceSysconBatteryGetElec(int *elec);
-int sceSyscon_driver_4C539345(int *elec);   // sceSysconBatteryGetTotalElec
+int sceSyscon_driver_4C539345(int *elec);     // sceSysconBatteryGetTotalElec
 static int (*sceUtilsBufferCopyWithRange)(u8 *outbuff, int outsize, u8 *inbuff, int insize, int cmd);
 
 static SceIdStorageConsoleIdCertificate g_ConsoleIdCertificate;
@@ -94,14 +95,14 @@ static void pspSyncCache(void) {
     sceKernelDcacheWritebackInvalidateAll();
 }
 
-u32 pspGetBaryonVersion(u32 *baryon) {
+u32 pspGetBaryonVersion(s32 *baryon) {
     int k1 = pspSdkSetK1(0);
     u32 err = sceSysconGetBaryonVersion(baryon);
     pspSdkSetK1(k1);
     return err;
 }
 
-u32 pspGetPommelVersion(u32 *pommel) {
+u32 pspGetPommelVersion(s32 *pommel) {
     int k1 = pspSdkSetK1(0);
     u32 err = sceSysconGetPommelVersion(pommel);
     pspSdkSetK1(k1);
@@ -111,6 +112,13 @@ u32 pspGetPommelVersion(u32 *pommel) {
 u32 pspGetTachyonVersion(void) {
     int k1 = pspSdkSetK1(0);
     u32 err = sceSysregGetTachyonVersion();
+    pspSdkSetK1(k1);
+    return err;
+}
+
+u32 pspGetPolestarVersion(s32 *polestar) {
+    int k1 = pspSdkSetK1(0);
+    u32 err = sceSyscon_driver_FB148FB6(polestar);
     pspSdkSetK1(k1);
     return err;
 }
@@ -191,27 +199,27 @@ int pspGetRegion(void) {
     u8 region[1];
     pspIdStorageLookup(0x100, 0x3D, region, 1);
     
-    if (region[0] == 0x03)//Japan
+    if (region[0] == 0x03)      // Japan
         return 0;
-    else if (region[0] == 0x04)//America
+    else if (region[0] == 0x04) // America
         return 1;
-    else if (region[0] == 0x09)//Australia
+    else if (region[0] == 0x09) // Australia
         return 2;
-    else if (region[0] == 0x07)//United Kingdom
+    else if (region[0] == 0x07) // United Kingdom
         return 3;
-    else if (region[0] == 0x05)//Europe
+    else if (region[0] == 0x05) // Europe
         return 4;
-    else if (region[0] == 0x06)//Korea
+    else if (region[0] == 0x06) // Korea
         return 5;
-    else if (region[0] == 0x0A)//Hong-Kong
+    else if (region[0] == 0x0A) // Hong-Kong
         return 6;
-    else if (region[0] == 0x0B)//Taiwan
+    else if (region[0] == 0x0B) // Taiwan
         return 7;
-    else if (region[0] == 0x0C)//Russia
+    else if (region[0] == 0x0C) // Russia
         return 8;
-    else if (region[0] == 0x0D)//China
+    else if (region[0] == 0x0D) // China
         return 9;
-    else if (region[0] == 0x08)//Mexico
+    else if (region[0] == 0x08) // Mexico
         return 10;
     else
         return -1;

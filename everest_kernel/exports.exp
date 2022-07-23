@@ -8,6 +8,7 @@ PSP_BEGIN_EXPORTS
         PSP_EXPORT_FUNC_HASH(pspGetBaryonVersion)
         PSP_EXPORT_FUNC_HASH(pspGetPommelVersion)
         PSP_EXPORT_FUNC_HASH(pspGetTachyonVersion)
+        PSP_EXPORT_FUNC_HASH(pspGetPolestarVersion)
         PSP_EXPORT_FUNC_HASH(pspGetFuseId)
         PSP_EXPORT_FUNC_HASH(pspGetFuseConfig)
         PSP_EXPORT_FUNC_HASH(pspGetKirkVersion)

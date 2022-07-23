@@ -9,8 +9,6 @@
 #include "translate.h"
 #include "kumdman.h"
 
-static char macbuf[18];
-
 ATAPI_INQURIY ai;
 u8 buf[0x38];
 u8 param[4] = { 0, 0, 0x38, 0 };
@@ -51,9 +49,9 @@ const char *pspGetRegionName(void) {
 #define UNKNOWN 0x00000000
 
 typedef struct {
-    u32 tachyon;
-    u32 baryon;
-    u32 pommel;
+    s32 tachyon;
+    s32 baryon;
+    s32 pommel;
     char *mobo_name;
 } Motherboard;
 
@@ -125,7 +123,10 @@ char *pspGetUMDFWText(void) {
 char *pspGetMacAddressText(void) {
     u8 macaddr[18];
     pspGetMACAddress(macaddr);
+
+    static char macbuf[18];
     snprintf(macbuf, 18, "%02X:%02X:%02X:%02X:%02X:%02X", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
+    
     return macbuf;
 }
 

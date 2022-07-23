@@ -16,11 +16,12 @@ typedef struct {
     u16 factoryCode; // 6
 } ScePsCode; // size = 8
 
-u32 pspGetBaryonVersion(u32 *baryon); // 0x7EC5A957
-u32 pspGetPommelVersion(u32 *pommel); // 0xE7E87741
-u32 pspGetTachyonVersion(void);       // 0xE2A5D1EE
-u64 pspGetFuseId(void);               // 0x4F46EEDE
-u32 pspGetFuseConfig(void);           // 0x8F4F4E96
+u32 pspGetBaryonVersion(s32 *baryon);
+u32 pspGetPommelVersion(s32 *pommel);
+u32 pspGetPolestarVersion(s32 *polestar);
+u32 pspGetTachyonVersion(void);
+u64 pspGetFuseId(void);
+u32 pspGetFuseConfig(void);
 u32 pspGetKirkVersion(void);
 u32 pspGetSpockVersion(void);
 u32 pspNandGetScramble(void);

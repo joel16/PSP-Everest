@@ -27,7 +27,7 @@ PSP_MODULE_INFO("PSP_EVEREST", 0, 2, 0);
 PSP_MAIN_THREAD_ATTR(0);
 
 #define NUM_DEL_ITEMS_MAIN      5
-#define NUM_DEL_ITEMS_HARDWARE  18
+#define NUM_DEL_ITEMS_HARDWARE  19
 #define NUM_DEL_ITEMS_BATTERY   14
 #define NUM_DEL_ITEMS_SYSTEM    7
 #define NUM_DEL_ITEMS_CONSOLEID 7
@@ -49,8 +49,8 @@ static u64 fuseid = 0;
 static ScePsCode pscode = { 0 };
 static char *vertxt = NULL;
 
-int psp_model, devkit, language;
-u32 tachyon, baryon, pommel;
+int psp_model = 0, devkit = 0, language = 0;
+s32 tachyon = 0, baryon = 0, pommel = 0, polestar = 0;
 
 void MainMenu(int select);
 
@@ -168,22 +168,23 @@ void HardwareInfo(void) {
     text_hardware[0] = pspEverestPrintf(10, 40, "Tachyon: 0x%08X", tachyon);
     text_hardware[1] = pspEverestPrintf(10, 60, "Baryon: 0x%08X", baryon);
     text_hardware[2] = pspEverestPrintf(10, 80, "Pommel: 0x%08X", pommel);
-    text_hardware[3] = pspEverestPrintf(10, 100, "FuseID: 0x%llX", fuseid);
-    text_hardware[4] = pspEverestPrintf(10, 120, "FuseCFG: 0x%08X", fusecfg);
-    text_hardware[5] = pspEverestPrintf(10, 140, "IDScramble: 0x%08X", scramble);
-    text_hardware[6] = pspEverestPrintf(10, 160, "Kirk: %c%c%c%c", kirk[3], kirk[2], kirk[1], kirk[0]);
-    text_hardware[7] = pspEverestPrintf(10, 180, psp_model == 4 ? "Spock: -" : "Spock: %c%c%c%c", spock[3], spock[2], spock[1], spock[0]);
-    text_hardware[8] = pspEverestPrintf(10, 200, pspGetFirstSymbolOfModel() != -1 ? trans->hardware.model : trans->hardware.no_model, psp_model == 4 ? "N" : psp_model == 10 ? "E" : "", pspGetFirstSymbolOfModel(), pspGetRegion() < 10 ? "0" : "", pspGetRegion(), pspGetModelName());
+    text_hardware[3] = pspEverestPrintf(10, 100, "Polestar: 0x%08X", polestar);
+    text_hardware[4] = pspEverestPrintf(10, 120, "FuseID: 0x%llX", fuseid);
+    text_hardware[5] = pspEverestPrintf(10, 140, "FuseCFG: 0x%08X", fusecfg);
+    text_hardware[6] = pspEverestPrintf(10, 160, "IDScramble: 0x%08X", scramble);
+    text_hardware[7] = pspEverestPrintf(10, 180, "Kirk: %c%c%c%c", kirk[3], kirk[2], kirk[1], kirk[0]);
+    text_hardware[8] = pspEverestPrintf(10, 200, psp_model == 4 ? "Spock: -" : "Spock: %c%c%c%c", spock[3], spock[2], spock[1], spock[0]);
+    text_hardware[9] = pspEverestPrintf(10, 220, pspGetFirstSymbolOfModel() != -1 ? trans->hardware.model : trans->hardware.no_model, psp_model == 4 ? "N" : psp_model == 10 ? "E" : "", pspGetFirstSymbolOfModel(), pspGetRegion() < 10 ? "0" : "", pspGetRegion(), pspGetModelName());
     
-    text_hardware[9] = pspEverestPrintf(250, 40, trans->hardware.mobo, pspGetMoBoName());
-    text_hardware[10] = pspEverestPrintf(250, 60, trans->hardware.region, pspGetRegionName());
-    text_hardware[11] = pspEverestPrintf(250, 80, trans->hardware.gen, psp_model < 10 ? "0" : "", psp_model + 1);
-    text_hardware[12] = pspEverestPrintf(250, 100, trans->hardware.eeprom, tachyon <= 0x00500000 && tachyon != 0x00100000 && baryon <= 0x0022B200 ? trans->yes : trans->no);
-    text_hardware[13] = pspEverestPrintf(250, 120, trans->hardware.pandora, tachyon <= 0x00500000 ? trans->yes : trans->no);
-    text_hardware[14] = pspEverestPrintf(250, 140, "MAC: %s", pspGetMacAddressText());
-    text_hardware[15] = pspEverestPrintf(250, 160, trans->hardware.initialfw, initial_fw);
-    text_hardware[16] = pspEverestPrintf(250, 180, trans->hardware.umdfw, psp_model == 4 ? "-" : pspGetUMDFWText());
-    text_hardware[17] = pspEverestPrintf(250, 200, trans->hardware.nandsize, (pspNandGetPageSize() * pspNandGetPagesPerBlock() * pspNandGetTotalBlocks()) / 1024 / 1024);
+    text_hardware[10] = pspEverestPrintf(250, 40, trans->hardware.mobo, pspGetMoBoName());
+    text_hardware[11] = pspEverestPrintf(250, 60, trans->hardware.region, pspGetRegionName());
+    text_hardware[12] = pspEverestPrintf(250, 80, trans->hardware.gen, psp_model < 10 ? "0" : "", psp_model + 1);
+    text_hardware[13] = pspEverestPrintf(250, 100, trans->hardware.eeprom, tachyon <= 0x00500000 && tachyon != 0x00100000 && baryon <= 0x0022B200 ? trans->yes : trans->no);
+    text_hardware[14] = pspEverestPrintf(250, 120, trans->hardware.pandora, tachyon <= 0x00500000 ? trans->yes : trans->no);
+    text_hardware[15] = pspEverestPrintf(250, 140, "MAC: %s", pspGetMacAddressText());
+    text_hardware[16] = pspEverestPrintf(250, 160, trans->hardware.initialfw, initial_fw);
+    text_hardware[17] = pspEverestPrintf(250, 180, trans->hardware.umdfw, psp_model == 4 ? "-" : pspGetUMDFWText());
+    text_hardware[18] = pspEverestPrintf(250, 200, trans->hardware.nandsize, (pspNandGetPageSize() * pspNandGetPagesPerBlock() * pspNandGetTotalBlocks()) / 1024 / 1024);
     
     SetBottomDialog(0, 1, ExitInMainMenuHardwareInfo, 1);
     SetFade();
@@ -402,6 +403,7 @@ int app_main(int argc, char *argv[]) {
     scramble = pspNandGetScramble();
     pspGetBaryonVersion(&baryon);
     pspGetPommelVersion(&pommel);
+    pspGetPolestarVersion(&polestar);
     devkit = sceKernelDevkitVersion();
     pspGetInitialFW(initial_fw);
     pspChkregGetPsCode(&pscode);
