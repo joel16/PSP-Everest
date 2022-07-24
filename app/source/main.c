@@ -12,18 +12,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "main.h"
-#include "vlf.h"
-#include "utils.h"
-#include "backgrounds_bmp.h"
+#include "consoleid_utils.h"
 #include "everest_kernel.h"
 #include "hardware_utils.h"
+#include "main.h"
 #include "system_utils.h"
-#include "consoleid_utils.h"
-
 #include "translate.h"
+#include "utils.h"
+#include "vlf.h"
 
-PSP_MODULE_INFO("PSP_EVEREST", 0, 2, 0);
+PSP_MODULE_INFO("PSP EVEREST 2 Rev6", 0, 2, 0);
 PSP_MAIN_THREAD_ATTR(0);
 
 #define NUM_DEL_ITEMS_MAIN      5
@@ -34,6 +32,9 @@ PSP_MAIN_THREAD_ATTR(0);
 
 #define EVE_ENTER_EN "Enter"
 #define EVE_BACK_EN "Back"
+
+extern unsigned char backgrounds_bmp_start[];
+extern unsigned int backgrounds_bmp_size;
 
 VlfText main_menu[NUM_DEL_ITEMS_MAIN], text_hardware[NUM_DEL_ITEMS_HARDWARE], text_battery[NUM_DEL_ITEMS_BATTERY],
     text_system[NUM_DEL_ITEMS_SYSTEM], text_consoleId[NUM_DEL_ITEMS_CONSOLEID], title_text;
@@ -91,7 +92,7 @@ void SetBackground(void) {
     else if (background_number > max_background_number)
         background_number = 0;
         
-    vlfGuiSetBackgroundFileBuffer(backgrounds_bmp + background_number * 6176, 6176, 1);
+    vlfGuiSetBackgroundFileBuffer(backgrounds_bmp_start + background_number * 6176, 6176, 1);
     SetFade();
 }
 
@@ -434,7 +435,7 @@ int app_main(int argc, char *argv[]) {
     vlfGuiAddEventHandler(PSP_CTRL_RTRIGGER, -1, OnBackgroundPlus, NULL);
     vlfGuiAddEventHandler(PSP_CTRL_LTRIGGER, -1, OnBackgroundMinus, NULL);
     
-    max_background_number = size_backgrounds_bmp / 6176 - 1;
+    max_background_number = backgrounds_bmp_size / 6176 - 1;
     background_number = Random(0, max_background_number);
     
     SetBackground();

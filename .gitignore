@@ -35,13 +35,15 @@
 *.i*86
 *.x86_64
 *.hex
+*.PBP
+app/*.prx
+app/*.SFO
 
 # Debug files
 *.dSYM/
 *.su
 *.idb
 *.pdb
-*.PBP
 
 # Kernel Module Compile Results
 *.mod*
@@ -51,3 +53,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+app/drivers

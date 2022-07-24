@@ -1,12 +1,13 @@
-#include <pspsdk.h>
 #include <pspkernel.h>
+#include <pspreg.h>
+#include <psprtc.h>
+#include <pspsdk.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <pspreg.h>
-#include <psprtc.h>
 
 #include "main.h"
+#include "vlf.h"
 
 int GetRegistryValue(const char *dir, const char *name, void *buf, int bufsize, int inttype) {
     int ret = 0;

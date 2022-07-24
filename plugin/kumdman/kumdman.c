@@ -1,7 +1,7 @@
 #include <pspsdk.h>
 #include <pspkernel.h>
 
-PSP_MODULE_INFO("pspUmdMan_Driver", 0x1000, 1, 0);
+PSP_MODULE_INFO("kumdman", PSP_MODULE_KERNEL, 1, 0);
 PSP_MAIN_THREAD_ATTR(0);
 
 int sceUmdManGetUmdDrive(int driveNum);

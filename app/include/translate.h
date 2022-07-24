@@ -1,5 +1,4 @@
-#ifndef __TRANSLATE_H__
-#define __TRANSLATE_H__
+#pragma once
 
 struct HardwareInformation {
     const char *model;
@@ -73,5 +72,3 @@ typedef struct _EverestTranslate {
 extern EverestTranslate *trans;
 
 void SetupTranslate(void);
-
-#endif

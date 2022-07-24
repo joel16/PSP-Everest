@@ -11,7 +11,7 @@
 #include "systemctrl.h"
 #include "everest_kernel.h"
 
-PSP_MODULE_INFO("EVEREST_KERNEL", 0x1006, 7, 4);
+PSP_MODULE_INFO("everest_kernel", 0x1006, 7, 4);
 PSP_MAIN_THREAD_ATTR(0);
 
 #define MAKE_CALL(f) (0x0C000000 | (((u32)(f) >> 2) & 0x03ffffff))

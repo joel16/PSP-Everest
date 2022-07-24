@@ -1,5 +1,5 @@
-#include <pspsdk.h>
 #include <pspkernel.h>
+#include <pspsdk.h>
 #include <string.h>
 #include <stdio.h>
 

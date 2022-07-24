@@ -4,7 +4,7 @@ PSP_BEGIN_EXPORTS
         PSP_EXPORT_VAR_HASH(module_info)
     PSP_EXPORT_END
     
-    PSP_EXPORT_START(pspUmdMan_driver, 0, 0x4001)
+    PSP_EXPORT_START(kumdman, 0, 0x4001)
         PSP_EXPORT_FUNC_HASH(pspUmdExecInquiryCmd)
         PSP_EXPORT_FUNC_HASH(pspUmdManGetUmdDrive)
     PSP_EXPORT_END

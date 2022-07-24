@@ -1,5 +1,4 @@
-#ifndef ___KPSPIDENT_H___
-#define ___KPSPIDENT_H___
+#pragma once
 
 /**
  * This structure contains console specific information. It is a subset of the ::SceConsoleId.
@@ -36,5 +35,3 @@ int pspWriteSerial(u16* serial);
 int pspChkregGetPsCode(ScePsCode *pPsCode);
 int pspSysconBatteryGetElec(int *elec);
 int pspSysconBatteryGetTotalElec(int *elec);
-
-#endif

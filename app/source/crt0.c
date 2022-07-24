@@ -1,16 +1,15 @@
-#include <pspsdk.h>
+#include <kubridge.h>
 #include <pspkernel.h>
+#include <pspsdk.h>
+#include <psputility_sysparam.h>
 #include <string.h>
 #include <stdio.h>
 #include <vlf.h>
-#include <kubridge.h>
-#include <psputility_sysparam.h>
 
 #include "main.h"
-#include "everest_kernel_prx.h"
-#include "kumdman_prx.h"
-#include "intraFont_prx.h"
-#include "vlf_prx.h"
+
+extern unsigned char everest_kernel_prx_start[], intraFont_prx_start[], kumdman_prx_start[], vlf_prx_start[];
+extern unsigned int everest_kernel_prx_size, intraFont_prx_size, kumdman_prx_size, vlf_prx_size;
 
 extern int app_main(int argc, char *argv[]);
 
@@ -34,8 +33,8 @@ int SetupCallbacks(void) {
     return thid;
 }
 
-void LoadStartModuleBuffer(char *path, char *buf, int size, SceSize args, void *argp) {
-    SceUID mod, out;
+void LoadStartModuleBuffer(const char *path, const void *buf, int size, SceSize args, void *argp) {
+    SceUID mod = 0, out = 0;
     
     sceIoRemove(path);
     out = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT, 0777);
@@ -63,13 +62,13 @@ int start_thread(SceSize args, void *argp) {
     path[last_trail] = '/';
     
     if (psp_model != 4)
-        LoadStartModuleBuffer("kumdman.prx", (void *)kumdman_prx, size_kumdman_prx, args, argp);
-        
-    LoadStartModuleBuffer("everest_kernel.prx", (void *)everest_kernel_prx, size_everest_kernel_prx, args, argp);
-    LoadStartModuleBuffer("intraFont.prx", (void *)intraFont_prx, size_intraFont_prx, args, argp);
-    strcpy((void *)vlf_prx + 0x6D678, "flash0:/font/ltn0.pgf");//WARNING: Path for font not be more 23 characters!
-    LoadStartModuleBuffer("vlf.prx", (void *)vlf_prx, size_vlf_prx, args, argp);
-    
+        LoadStartModuleBuffer("kumdman.prx", kumdman_prx_start, kumdman_prx_size, args, argp);
+
+    strcpy((char *)vlf_prx_start + 0x6D678, "flash0:/font/ltn0.pgf"); // WARNING: Path for font not be more 23 characters!
+    LoadStartModuleBuffer("everest_kernel.prx", everest_kernel_prx_start, everest_kernel_prx_size, args, argp);
+    LoadStartModuleBuffer("intraFont.prx", intraFont_prx_start, intraFont_prx_size, args, argp);
+    LoadStartModuleBuffer("vlf.prx", vlf_prx_start, vlf_prx_size, args, argp);
+
     vlfGuiInit(-1, app_main);
     return sceKernelExitDeleteThread(0);
 }

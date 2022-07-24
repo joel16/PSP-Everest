@@ -1,5 +1,4 @@
-#ifndef ___KUMDMAN_H___
-#define ___KUMDMAN_H___
+#pragma once
 
 extern char outtxt[0x12];
 
@@ -21,5 +20,3 @@ extern u8 param[4];
 
 void *pspUmdManGetUmdDrive(int driveNum);
 int pspUmdExecInquiryCmd(void *drive, u8 *param, u8 *buf);
-
-#endif
