@@ -1,10 +1,13 @@
 #include <pspsdk.h>
+#include <stdio.h>
+
+#include "consoleid_utils.h"
 
 // Info from https://github.com/CelesteBlue-dev/PS-ConsoleId-wiki/blob/master/PS-ConsoleId-wiki.txt
 
 const char *pspGetProductCodeInfo(u16 productCode) {
     const char *product_codes[] = {
-        "Test - Prototype / Test unit",
+        "Test - Prototype / Test Unit",
         "Tool - DevKit / Development Tool",
         "DEX - TestKit / Testing Kit",
         "CEX - Japan",
@@ -48,7 +51,10 @@ const char *pspGetProductSubCodeInfo(u16 productSubCode) {
 }
 
 const char *pspGetFactoryCodeInfo(u16 factoryCode) {
-    if (factoryCode == 2) {
+    if (factoryCode == 0) {
+        return "Invalid: PSP Kicho & Dencho Program";
+    }
+    else if (factoryCode == 2) {
         return "China manufacture 1 (01g)";
     }
     else if (factoryCode == 3) {
@@ -65,4 +71,13 @@ const char *pspGetFactoryCodeInfo(u16 factoryCode) {
     }
     
     return "-";
+}
+
+const char *pspGetPSID(PspOpenPSID *openpsid) {
+    static char PSID[33];
+
+    for (int i = 0; i < 16; i++)
+        snprintf(&PSID[2 * i], 33, "%02X", openpsid->data[i]);
+    
+    return PSID;
 }

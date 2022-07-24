@@ -1,8 +1,8 @@
-#ifndef ___CONSOLEID_UTILS_H___
-#define ___CONSOLEID_UTILS_H___
+#pragma once
+
+#include <pspopenpsid.h>
 
 const char *pspGetProductCodeInfo(u16 productCode);
 const char *pspGetProductSubCodeInfo(u16 productSubCode);
 const char *pspGetFactoryCodeInfo(u16 factoryCode);
-
-#endif
+const char *pspGetPSID(PspOpenPSID *openpsid);

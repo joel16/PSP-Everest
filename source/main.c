@@ -30,13 +30,13 @@ PSP_MAIN_THREAD_ATTR(0);
 #define NUM_DEL_ITEMS_HARDWARE  19
 #define NUM_DEL_ITEMS_BATTERY   14
 #define NUM_DEL_ITEMS_SYSTEM    7
-#define NUM_DEL_ITEMS_CONSOLEID 7
+#define NUM_DEL_ITEMS_CONSOLEID 8
 
 #define EVE_ENTER_EN "Enter"
 #define EVE_BACK_EN "Back"
 
 VlfText main_menu[NUM_DEL_ITEMS_MAIN], text_hardware[NUM_DEL_ITEMS_HARDWARE], text_battery[NUM_DEL_ITEMS_BATTERY],
-    text_system[NUM_DEL_ITEMS_SYSTEM], text_consoleId[NUM_DEL_ITEMS_SYSTEM], title_text;
+    text_system[NUM_DEL_ITEMS_SYSTEM], text_consoleId[NUM_DEL_ITEMS_CONSOLEID], title_text;
 VlfPicture title_pic, pic_button_assign;
 
 static int background_number = 0, max_background_number = 0;
@@ -48,6 +48,7 @@ static u16 bserialdata[2], serialdata[2];
 static u64 fuseid = 0;
 static ScePsCode pscode = { 0 };
 static char *vertxt = NULL;
+static PspOpenPSID psid = { 0 };
 
 int psp_model = 0, devkit = 0, language = 0;
 s32 tachyon = 0, baryon = 0, pommel = 0, polestar = 0;
@@ -326,16 +327,19 @@ void SystemInfo(void) {
 }
 
 void ConsoleIdInfo(void) {
-    text_consoleId[0] = pspEverestPrintf(10, 70, "Company Code: %d", pscode.companyCode);
-    text_consoleId[1] = pspEverestPrintf(10, 90, "Factory Code: %d", pscode.factoryCode);
-    text_consoleId[2] = pspEverestPrintf(237, 70, "Product Code: 0x%04X", pscode.productCode);
-    text_consoleId[3] = pspEverestPrintf(237, 90, "Product Sub Code: 0x%04X", pscode.productSubCode);
+    text_consoleId[0] = pspEverestPrintf(10, 40, "PSID: %s", pspGetPSID(&psid));
 
-    text_consoleId[4] = pspEverestPrintf(10, 120, "Product: %s", pspGetProductCodeInfo(pscode.productCode));
-    text_consoleId[5] = pspEverestPrintf(10, 140, "Product Sub: %s", pspGetProductSubCodeInfo(pscode.productSubCode));
-    text_consoleId[6] = pspEverestPrintf(10, 160, "Factory: %s", pspGetFactoryCodeInfo(pscode.factoryCode));
+    text_consoleId[1] = pspEverestPrintf(10, 60, "Company Code: %d", pscode.companyCode);
+    
+    text_consoleId[2] = pspEverestPrintf(10, 90, "Factory Code: %d", pscode.factoryCode);
+    text_consoleId[3] = pspEverestPrintf(10, 110, pspGetFactoryCodeInfo(pscode.factoryCode));
 
-    vlfGuiSetTextFontSize(text_consoleId[6], 0.75f);
+    text_consoleId[4] = pspEverestPrintf(10, 140, "Product Code: 0x%04X", pscode.productCode);
+    text_consoleId[5] = pspEverestPrintf(10, 160, pspGetProductCodeInfo(pscode.productCode));
+
+    text_consoleId[6] = pspEverestPrintf(10, 190, "Product Sub Code: 0x%04X", pscode.productSubCode);
+    text_consoleId[7] = pspEverestPrintf(10, 210, pspGetProductSubCodeInfo(pscode.productSubCode));
+
     SetBottomDialog(0, 1, ExitInMainMenuConsoleIdInfo, 1);
     SetFade();
 }
@@ -407,6 +411,7 @@ int app_main(int argc, char *argv[]) {
     devkit = sceKernelDevkitVersion();
     pspGetInitialFW(initial_fw);
     pspChkregGetPsCode(&pscode);
+    sceOpenPSIDGetOpenPSID(&psid);
     GetRegistryValue("/CONFIG/SYSTEM/XMB", "button_assign", &button_assign, 4, 1);
     vertxt = pspGetVersionTxt();
     

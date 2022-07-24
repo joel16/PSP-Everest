@@ -11,7 +11,7 @@ ASFLAGS = $(CFLAGS) -c
 LDFLAGS = -nostdlib -nodefaultlibs
 
 LIBDIR  = libs/lib
-STDLIBS = -lpspmodinfo -lpsprtc -lvlfgui -lvlfgu -lvlfutils -lvlflibc -lpsppower -lpspkubridge
+STDLIBS = -lpspmodinfo -lpspopenpsid -lpsprtc -lvlfgui -lvlfgu -lvlfutils -lvlflibc -lpsppower -lpspkubridge
 LIBS = $(STDLIBS) -lpspreg
 
 EXTRA_TARGETS = EBOOT.PBP
