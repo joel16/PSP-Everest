@@ -9,7 +9,7 @@
 #include "main.h"
 #include "vlf.h"
 
-int GetRegistryValue(const char *dir, const char *name, void *buf, int bufsize, int inttype) {
+int pspGetRegistryValue(const char *dir, const char *name, void *buf, int bufsize, int inttype) {
     int ret = 0;
     struct RegParam reg;
     REGHANDLE h;
@@ -44,11 +44,11 @@ int GetRegistryValue(const char *dir, const char *name, void *buf, int bufsize, 
     return ret;
 }
 
-int Random(int min, int max) {
-    u64 tick;
-    SceKernelUtilsMt19937Context ctx;
+int random(int min, int max) {
+    u64 tick = 0;
+    SceKernelUtilsMt19937Context ctx = { 0 };
     sceRtcGetCurrentTick(&tick);
-    sceKernelUtilsMt19937Init(&ctx, (u32)tick);
+    sceKernelUtilsMt19937Init(&ctx, tick);
     return min + (sceKernelUtilsMt19937UInt(&ctx) % max);
 }
 

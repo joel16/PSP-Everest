@@ -310,11 +310,11 @@ void SystemInfo(void) {
     vlfGuiSetPictureXY(pic_button_assign, 131, 68);
     
     char unicode_username[26];
-    utf82unicode((wchar_t *)unicode_username, (char *)GetRegistryValue("/CONFIG/SYSTEM", "owner_name", &username, sizeof(username), 0));
+    utf82unicode((wchar_t *)unicode_username, (char *)pspGetRegistryValue("/CONFIG/SYSTEM", "owner_name", &username, sizeof(username), 0));
     
     text_system[2] = pspEverestPrintf(237, 45, trans->system.username);
     text_system[3] = vlfGuiAddTextW(language == PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN ? 337 : 327, 45, (u16 *)unicode_username);
-    text_system[4] = pspEverestPrintf(237, 65, trans->system.password, GetRegistryValue("/CONFIG/SYSTEM/LOCK", "password", &password, sizeof(password), 0));
+    text_system[4] = pspEverestPrintf(237, 65, trans->system.password, pspGetRegistryValue("/CONFIG/SYSTEM/LOCK", "password", &password, sizeof(password), 0));
     text_system[5] = pspEverestPrintf(10, 120, "version.txt:");
 
     if (vertxt != NULL)
@@ -413,7 +413,7 @@ int app_main(int argc, char *argv[]) {
     pspGetInitialFW(initial_fw);
     pspChkregGetPsCode(&pscode);
     sceOpenPSIDGetOpenPSID(&psid);
-    GetRegistryValue("/CONFIG/SYSTEM/XMB", "button_assign", &button_assign, 4, 1);
+    pspGetRegistryValue("/CONFIG/SYSTEM/XMB", "button_assign", &button_assign, 4, 1);
     vertxt = pspGetVersionTxt();
     
     vlfGuiSystemSetup(1, 1, 1);
@@ -436,7 +436,7 @@ int app_main(int argc, char *argv[]) {
     vlfGuiAddEventHandler(PSP_CTRL_LTRIGGER, -1, OnBackgroundMinus, NULL);
     
     max_background_number = backgrounds_bmp_size / 6176 - 1;
-    background_number = Random(0, max_background_number);
+    background_number = random(0, max_background_number);
     
     SetBackground();
     MainMenu(0);
