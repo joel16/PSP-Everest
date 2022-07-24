@@ -38,6 +38,8 @@
 *.PBP
 app/*.prx
 app/*.SFO
+app/data/everest_kernel.prx
+app/data/kumdman.prx
 
 # Debug files
 *.dSYM/
