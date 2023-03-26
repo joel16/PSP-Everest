@@ -1,5 +1,11 @@
 #pragma once
 
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
+#include <pspsdk.h>
+
 /**
  * This structure contains console specific information. It is a subset of the ::SceConsoleId.
  * Check <openpsid_kernel.h> for possible member values.
@@ -35,3 +41,8 @@ int pspWriteSerial(u16* serial);
 int pspChkregGetPsCode(ScePsCode *pPsCode);
 int pspSysconBatteryGetElec(int *elec);
 int pspSysconBatteryGetTotalElec(int *elec);
+int pspGetModel(void);
+
+#if defined (__cplusplus)
+}
+#endif

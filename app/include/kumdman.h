@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
 extern char outtxt[0x12];
 
 typedef struct {
@@ -20,3 +24,7 @@ extern u8 param[4];
 
 void *pspUmdManGetUmdDrive(int driveNum);
 int pspUmdExecInquiryCmd(void *drive, u8 *param, u8 *buf);
+
+#if defined (__cplusplus)
+}
+#endif
