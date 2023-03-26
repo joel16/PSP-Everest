@@ -1,4 +1,4 @@
-SUBDIRS = plugin/everest_kernel plugin/kumdman app
+SUBDIRS = plugin/kernel plugin/kumdman app
 
 all:
 	@for dir in $(SUBDIRS); do $(MAKE) -C $$dir; done

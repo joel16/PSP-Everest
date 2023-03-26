@@ -1,5 +1,5 @@
-TARGET = everest_kernel
-OBJS = everest_kernel.o imports.o exports.o
+TARGET = kernel
+OBJS = kernel.o imports.o exports.o
 
 PRX_EXPORTS = exports.exp
 
@@ -21,5 +21,5 @@ include $(PSPSDK)/lib/build_prx.mak
 
 all:
 	psp-build-exports -s $(PRX_EXPORTS)
-	mkdir "../../app/data/"; mv everest_kernel.prx "../../app/data/"
-	mkdir "../../app/drivers/"; mv everest_kernel.S "../../app/drivers/"
+	mkdir "../../app/data/"; mv kernel.prx "../../app/data/"
+	mkdir "../../app/drivers/"; mv kernel.S "../../app/drivers/"

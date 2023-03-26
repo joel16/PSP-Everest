@@ -1,6 +1,10 @@
 #ifndef __VLF_H__
 #define __VLF_H__
 
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
 typedef struct _VlfText *VlfText;
 typedef struct _VlfPicture *VlfPicture;
 typedef struct _VlfShadowedPicture *VlfShadowedPicture;
@@ -773,7 +777,7 @@ VlfPicture vlfGuiAddPictureFile(char *file, int x, int y);
  *
  * @returns - a new VlfPivture on success, NULL on error
 */
-VlfPicture vlfGuiAddPictureResource(char *rco, char *name, int x, int y);
+VlfPicture vlfGuiAddPictureResource(const char *rco, const char *name, int x, int y);
 
 /**
  * Removes a picture
@@ -1795,7 +1799,7 @@ void vlfGuiCancelBottomDialog();
  *
  * @returns - < 0 on error
 */
-int vlfGuiCentralMenu(int noptions, char **items, int defaultsel, int (* handler)(int sel), int dispx, int dispy);
+int vlfGuiCentralMenu(int noptions, const char **items, int defaultsel, int (* handler)(int sel), int dispx, int dispy);
 
 /**
  * Cancels (remove) the central menu
@@ -2029,7 +2033,8 @@ int vlfGuiSetEventDelayEx(int (* func)(void *), void * param, u32 delay);
 */
 int vlfGuiDelayAllEvents(u32 delay);
 
-
-
+#if defined (__cplusplus)
+}
 #endif
 
+#endif
