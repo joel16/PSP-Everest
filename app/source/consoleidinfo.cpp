@@ -53,23 +53,24 @@ namespace ConsoleIdInfo {
     }
     
     const char *GetFactoryCodeInfo(u16 factoryCode) {
-        if (factoryCode == 0) {
-            return "Invalid: PSP Kicho & Dencho Program";
+        const char *factory_codes[] {
+            "Invalid: PSP Kicho & Dencho Program",
+            "-",
+            "China manufacture 1 (01g)",
+            "China manufacture 2 (02g, 03g, 04g, 05g, 07g, 09g)",
+            "China manufacture 3 (04g and 11g)"
+        };
+
+        if (factoryCode < 5) {
+            return factory_codes[factoryCode];
         }
-        else if (factoryCode == 2) {
-            return "China manufacture 1 (01g)";
-        }
-        else if (factoryCode == 3) {
-            return "China manufacture 2 (02g, 03g, 04g, 05g, 07g, 09g)";
-        }
-        else if (factoryCode == 4) {
-            return "China manufacture 3 (04g and 11g)";
-        }
-        else if (factoryCode == 35) {
-            return "Japan Diagnosis Center 1 (Diag/QA PSP)";
-        }
-        else if (factoryCode == 62) {
-            return "Servicing Center 2 (refurbished 01g)";
+        else {
+            if (factoryCode == 35) {
+                return "Japan Diagnosis Center 1 (Diag/QA PSP)";
+            }
+            else if (factoryCode == 62) {
+                return "Servicing Center 2 (refurbished 01g)";
+            }
         }
         
         return "-";
