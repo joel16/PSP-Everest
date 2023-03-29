@@ -7,4 +7,5 @@ namespace HardwareInfo {
     char *GetUMDFirmware(void);
     char *GetMacAddress(void);
     const char *GetModel(void);
+    const char *GetQAFlag(void);
 }

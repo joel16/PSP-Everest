@@ -7,5 +7,6 @@
     STUB_END
 
     STUB_START "sceChkreg_driver",0x00090000,0x00010005
-    STUB_FUNC  0x59F8491D,sceChkreg_driver_59F8491D
+    STUB_FUNC  0x59F8491D,sceChkregGetPsCode
+    STUB_FUNC  0x6894A027,sceChkregGetPsFlags
     STUB_END

@@ -138,4 +138,15 @@ namespace HardwareInfo {
         const char *models[] = { "PSP Fat", "PSP Slim", "PSP Brite", "PSP Brite", "PSPgo", "-", "PSP Brite", "-", "PSP Brite", "-", "PSP Street" };
         return models[psp_model];
     }
+
+    const char *GetQAFlag(void) {
+        u8 ps_flags = 0;
+        int ret = pspChkregGetPsFlags(&ps_flags, 0);
+
+        if (ret < 0) {
+            return "-";
+        }
+
+        return ps_flags == 0x00000001? "0x00000001" : "0x00000002";
+    }
 }

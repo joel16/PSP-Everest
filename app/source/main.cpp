@@ -37,7 +37,7 @@ s32 tachyon = 0, baryon = 0, pommel = 0, polestar = 0;
 
 namespace Menus {
     static constexpr u8 NUM_DEL_ITEMS_MAIN = 5;
-    static constexpr u8 NUM_DEL_ITEMS_HARDWARE = 19;
+    static constexpr u8 NUM_DEL_ITEMS_HARDWARE = 20;
     static constexpr u8 NUM_DEL_ITEMS_BATTERY = 14;
     static constexpr u8 NUM_DEL_ITEMS_SYSTEM = 7;
     static constexpr u8 NUM_DEL_ITEMS_CONSOLEID = 8;
@@ -113,6 +113,7 @@ namespace Menus {
         text_hardware[16] = GUI::Printf(250, 160, trans->hardware.initialfw, initial_fw);
         text_hardware[17] = GUI::Printf(250, 180, trans->hardware.umdfw, psp_model == 4 ? "-" : HardwareInfo::GetUMDFirmware());
         text_hardware[18] = GUI::Printf(250, 200, trans->hardware.nandsize, (pspNandGetPageSize() * pspNandGetPagesPerBlock() * pspNandGetTotalBlocks()) / 1024 / 1024);
+        text_hardware[19] = GUI::Printf(250, 220, "QA Flag: %s", HardwareInfo::GetQAFlag());
         
         GUI::SetBottomDialog(0, 1, Menus::HardwareInfoHandler, 1);
         GUI::SetFade();

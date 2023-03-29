@@ -23,6 +23,7 @@ PSP_BEGIN_EXPORTS
         PSP_EXPORT_FUNC_HASH(pspWriteSerial)
         PSP_EXPORT_FUNC_HASH(pspReadSerial)
         PSP_EXPORT_FUNC_HASH(pspChkregGetPsCode)
+        PSP_EXPORT_FUNC_HASH(pspChkregGetPsFlags)
         PSP_EXPORT_FUNC_HASH(pspSysconBatteryGetElec)
         PSP_EXPORT_FUNC_HASH(pspSysconBatteryGetTotalElec)
         PSP_EXPORT_FUNC_HASH(pspGetModel)

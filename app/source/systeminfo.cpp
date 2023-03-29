@@ -124,6 +124,22 @@ namespace SystemInfo {
                 return "ME";
             }
         }
+        else if (devkit == 0x06060110) {
+            if (static_cast<u32>(sctrlHENGetMinorVersion()) != 0x8002013A) {
+                if (hen_version == 0x00001001) {
+                    return "PRO";
+                }
+                else if (hen_version == 0x00001002) {
+                    return "PRO-B";
+                }
+                else if (hen_version == 0x00001003) {
+                    return "PRO-C";
+                }
+            }
+            else if (hen_version == 0x00001000) {
+                return "ME";
+            }
+        }
         
         return "";
     }

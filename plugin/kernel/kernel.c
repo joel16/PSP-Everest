@@ -27,7 +27,8 @@ u32 sceSysconCmdExec(void *param, int unk);
 int sceSysconBatteryGetElec(int *elec);
 int sceSyscon_driver_4C539345(int *elec);     // sceSysconBatteryGetTotalElec
 static int (*sceUtilsBufferCopyWithRange)(u8 *outbuff, int outsize, u8 *inbuff, int insize, int cmd);
-s32 sceChkreg_driver_59F8491D(ScePsCode *pPsCode);
+s32 sceChkregGetPsCode(ScePsCode *pPsCode);
+s32 sceChkregGetPsFlags(u8 *pPsFlags, s32 index);
 
 static int _sceUtilsBufferCopyWithRange(u8 *outbuff, int outsize, u8 *inbuff, int insize, int cmd) {
     return (*sceUtilsBufferCopyWithRange)(outbuff, outsize, inbuff, insize, cmd);
@@ -295,9 +296,16 @@ int pspReadSerial(u16 *pdata) {
     return err;
 }
 
-int pspChkregGetPsCode(ScePsCode *pPsCode) {
+int pspChkregGetPsCode(ScePsCode *psCode) {
     int k1 = pspSdkSetK1(0);
-    int ret = sceChkreg_driver_59F8491D(pPsCode);
+    int ret = sceChkregGetPsCode(psCode);
+    pspSdkSetK1(k1);
+    return ret;
+}
+
+int pspChkregGetPsFlags(u8 *psFlags, s32 index) {
+    int k1 = pspSdkSetK1(0);
+    int ret = sceChkregGetPsFlags(psFlags, index);
     pspSdkSetK1(k1);
     return ret;
 }
