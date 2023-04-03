@@ -1,22 +1,20 @@
 //>>> PSP_EVEREST 2
 //Copyright(C) 2023, frostegater, Joel16
 
+#include <cstdio>
+#include <cstring>
 #include <pspctrl.h>
 #include <pspidstorage.h>
 #include <pspkernel.h>
 #include <psppower.h>
-#include <pspsdk.h>
 #include <psputility_sysparam.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "consoleidinfo.h"
 #include "gui.h"
 #include "hardwareinfo.h"
 #include "kernel.h"
 #include "main.h"
+#include "screenshot.h"
 #include "systeminfo.h"
 #include "translate.h"
 #include "utils.h"
@@ -42,6 +40,7 @@ namespace Menus {
     static constexpr u8 NUM_DEL_ITEMS_SYSTEM = 7;
     static constexpr u8 NUM_DEL_ITEMS_CONSOLEID = 8;
 
+    static u8 menu = 0;
     static bool battery_break = false;
     static u16 bserialdata[2], serialdata[2];
     static VlfText text_hardware[NUM_DEL_ITEMS_HARDWARE], text_battery[NUM_DEL_ITEMS_BATTERY],
@@ -281,28 +280,43 @@ namespace Menus {
         GUI::SetBottomDialog(0, 1, Menus::ConsoleIdInfoHandler, 1);
         GUI::SetFade();
     }
+
+    int Capture(void *param) {
+        Screenshot::Capture(menu);
+        return VLF_EV_RET_NOTHING;
+    }
+
+    void HandleScreenshot(int select) {
+        menu = select;
+        vlfGuiRemoveEventHandler(Menus::Capture);
+        vlfGuiAddEventHandler(PSP_CTRL_SQUARE, -1, Menus::Capture, nullptr);
+    }
     
     int MainMenuHandler(int select) {
         switch(select) {
             case 0:
                 vlfGuiCancelCentralMenu();
                 Menus::HardwareInfo();
+                Menus::HandleScreenshot(select);
                 break;
                 
             case 1:
                 vlfGuiCancelCentralMenu();
                 battery_break = false;
+                Menus::HandleScreenshot(select);
                 Menus::BatteryInfo();
                 break;
                 
             case 2:
                 vlfGuiCancelCentralMenu();
                 Menus::SystemInfo();
+                Menus::HandleScreenshot(select);
                 break;
                 
             case 3:
                 vlfGuiCancelCentralMenu();
                 Menus::ConsoleIdInfo();
+                Menus::HandleScreenshot(select);
                 break;
                 
             case 4:
@@ -329,11 +343,7 @@ namespace Menus {
     }
 }
 
-#if defined (__cplusplus)
-extern "C" {
-#endif
-
-int app_main(int argc, char *argv[]) {
+extern "C" int app_main(int argc, char *argv[]) {
     sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &language);
     SetupTranslate();
     
@@ -374,7 +384,3 @@ int app_main(int argc, char *argv[]) {
         
     return 0;
 }
-
-#if defined (__cplusplus)
-}
-#endif

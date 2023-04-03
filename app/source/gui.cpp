@@ -1,6 +1,6 @@
-#include <pspsdk.h>
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
+#include <pspkernel.h>
 
 #include "gui.h"
 #include "utils.h"

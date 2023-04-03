@@ -494,7 +494,7 @@ void vlfGuiSetTitleBarVisibility(int visible);
  *
  * @returns a VlfText item on success, NULL on error.
 */
-VlfText vlfGuiAddText(int x, int y, char *string);
+VlfText vlfGuiAddText(int x, int y, const char *string);
 
 /**
  * Adds a new text item from an unicode string.

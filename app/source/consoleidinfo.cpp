@@ -1,5 +1,5 @@
-#include <pspsdk.h>
-#include <stdio.h>
+#include <cstdio>
+#include <pspkernel.h>
 
 #include "consoleidinfo.h"
 

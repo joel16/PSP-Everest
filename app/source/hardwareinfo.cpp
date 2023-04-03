@@ -1,7 +1,6 @@
+#include <cstring>
+#include <cstdio>
 #include <pspkernel.h>
-#include <pspsdk.h>
-#include <string.h>
-#include <stdio.h>
 
 #include "kernel.h"
 #include "kumdman.h"

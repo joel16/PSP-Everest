@@ -1,9 +1,8 @@
+#include <cstring>
 #include <pspkernel.h>
 #include <pspreg.h>
 #include <psprtc.h>
 #include <pspsdk.h>
-#include <string.h>
-#include <stdio.h>
 
 #include "main.h"
 

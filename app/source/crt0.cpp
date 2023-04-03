@@ -1,15 +1,11 @@
-
+#include <cstdio>
+#include <cstring>
 #include <pspkernel.h>
-#include <pspsdk.h>
 #include <psputility_sysparam.h>
-#include <string.h>
-#include <stdio.h>
-#include <vlf.h>
-
-
 
 #include "main.h"
 #include "kernel.h"
+#include "vlf.h"
 
 extern unsigned char kernel_prx_start[], intraFont_prx_start[], kumdman_prx_start[], vlf_prx_start[];
 extern unsigned int kernel_prx_size, intraFont_prx_size, kumdman_prx_size, vlf_prx_size;
