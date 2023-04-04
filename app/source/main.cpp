@@ -23,13 +23,19 @@
 PSP_MODULE_INFO("PSP EVEREST 2 Rev 7", PSP_MODULE_USER, 2, 7);
 PSP_MAIN_THREAD_ATTR(0);
 
-static char initial_fw[8], kirk[4], spock[4];
-static u32 fusecfg = 0, scramble = 0;
-static u64 fuseid = 0;
-static ScePsCode pscode = { 0 };
-static char *vertxt = nullptr;
-static PspOpenPSID psid = { 0 };
+typedef struct {
+    char initial_fw[8];
+    char kirk[4];
+    char spock[4];
+    u32 fusecfg;
+    u32 scramble;
+    u64 fuseid;
+    PspOpenPSID psid;
+    ScePsCode pscode;
+    char *vertxt;
+} MenuItem;
 
+static MenuItem menu_item = { 0 };
 int psp_model = 0, devkit = 0, language = 0;
 s32 tachyon = 0, baryon = 0, pommel = 0, polestar = 0;
 
@@ -96,11 +102,11 @@ namespace Menus {
         text_hardware[1] = GUI::Printf(10, 60, "Baryon: 0x%08X", baryon);
         text_hardware[2] = GUI::Printf(10, 80, "Pommel: 0x%08X", pommel);
         text_hardware[3] = GUI::Printf(10, 100, "Polestar: 0x%08X", polestar);
-        text_hardware[4] = GUI::Printf(10, 120, "FuseID: 0x%llX", fuseid);
-        text_hardware[5] = GUI::Printf(10, 140, "FuseCFG: 0x%08X", fusecfg);
-        text_hardware[6] = GUI::Printf(10, 160, "IDScramble: 0x%08X", scramble);
-        text_hardware[7] = GUI::Printf(10, 180, "Kirk: %c%c%c%c", kirk[3], kirk[2], kirk[1], kirk[0]);
-        text_hardware[8] = GUI::Printf(10, 200, psp_model == 4 ? "Spock: -" : "Spock: %c%c%c%c", spock[3], spock[2], spock[1], spock[0]);
+        text_hardware[4] = GUI::Printf(10, 120, "FuseID: 0x%llX", menu_item.fuseid);
+        text_hardware[5] = GUI::Printf(10, 140, "FuseCFG: 0x%08X", menu_item.fusecfg);
+        text_hardware[6] = GUI::Printf(10, 160, "IDScramble: 0x%08X", menu_item.scramble);
+        text_hardware[7] = GUI::Printf(10, 180, "Kirk: %c%c%c%c", menu_item.kirk[3], menu_item.kirk[2], menu_item.kirk[1], menu_item.kirk[0]);
+        text_hardware[8] = GUI::Printf(10, 200, psp_model == 4 ? "Spock: -" : "Spock: %c%c%c%c", menu_item.spock[3], menu_item.spock[2], menu_item.spock[1], menu_item.spock[0]);
         text_hardware[9] = GUI::Printf(10, 220, HardwareInfo::GetModelSymbol() != -1 ? trans->hardware.model : trans->hardware.no_model, psp_model == 4 ? "N" : psp_model == 10 ? "E" : "", HardwareInfo::GetModelSymbol(), pspGetRegion() < 10 ? "0" : "", pspGetRegion(), HardwareInfo::GetModel());
         
         text_hardware[10] = GUI::Printf(250, 40, trans->hardware.mobo, HardwareInfo::GetMotherboard());
@@ -109,7 +115,7 @@ namespace Menus {
         text_hardware[13] = GUI::Printf(250, 100, trans->hardware.eeprom, tachyon <= 0x00500000 && tachyon != 0x00100000 && baryon <= 0x0022B200 ? trans->yes : trans->no);
         text_hardware[14] = GUI::Printf(250, 120, trans->hardware.pandora, tachyon <= 0x00500000 ? trans->yes : trans->no);
         text_hardware[15] = GUI::Printf(250, 140, "MAC: %s", HardwareInfo::GetMacAddress());
-        text_hardware[16] = GUI::Printf(250, 160, trans->hardware.initialfw, initial_fw);
+        text_hardware[16] = GUI::Printf(250, 160, trans->hardware.initialfw, menu_item.initial_fw);
         text_hardware[17] = GUI::Printf(250, 180, trans->hardware.umdfw, psp_model == 4 ? "-" : HardwareInfo::GetUMDFirmware());
         text_hardware[18] = GUI::Printf(250, 200, trans->hardware.nandsize, (pspNandGetPageSize() * pspNandGetPagesPerBlock() * pspNandGetTotalBlocks()) / 1024 / 1024);
         text_hardware[19] = GUI::Printf(250, 220, "QA Flag: %s", HardwareInfo::GetQAFlag());
@@ -249,8 +255,8 @@ namespace Menus {
         text_system[4] = GUI::Printf(237, 65, trans->system.password, Utils::GetRegistryValue("/CONFIG/SYSTEM/LOCK", "password", &password, sizeof(password), 0));
         text_system[5] = GUI::Printf(10, 120, "version.txt:");
         
-        if (vertxt != nullptr) {
-            text_system[6] = vlfGuiAddTextF(10, 143, vertxt);
+        if (menu_item.vertxt != nullptr) {
+            text_system[6] = vlfGuiAddTextF(10, 143, menu_item.vertxt);
         }
         else {
             text_system[6] = GUI::Printf(10, 143, trans->system.vertxterr);
@@ -264,18 +270,18 @@ namespace Menus {
     void ConsoleIdInfo(void) {
         GUI::SetTitle("Console ID Information");
 
-        text_consoleId[0] = GUI::Printf(10, 40, "PSID: %s", ConsoleIdInfo::GetPSID(&psid));
+        text_consoleId[0] = GUI::Printf(10, 40, "PSID: %s", ConsoleIdInfo::GetPSID(&menu_item.psid));
         
-        text_consoleId[1] = GUI::Printf(10, 60, "Company Code: %d", pscode.companyCode);
+        text_consoleId[1] = GUI::Printf(10, 60, "Company Code: %d", menu_item.pscode.companyCode);
         
-        text_consoleId[2] = GUI::Printf(10, 90, "Factory Code: %d", pscode.factoryCode);
-        text_consoleId[3] = GUI::Printf(10, 110, ConsoleIdInfo::GetFactoryCodeInfo(pscode.factoryCode));
+        text_consoleId[2] = GUI::Printf(10, 90, "Factory Code: %d", menu_item.pscode.factoryCode);
+        text_consoleId[3] = GUI::Printf(10, 110, ConsoleIdInfo::GetFactoryCodeInfo(menu_item.pscode.factoryCode));
         
-        text_consoleId[4] = GUI::Printf(10, 140, "Product Code: 0x%04X", pscode.productCode);
-        text_consoleId[5] = GUI::Printf(10, 160, ConsoleIdInfo::GetProductCodeInfo(pscode.productCode));
+        text_consoleId[4] = GUI::Printf(10, 140, "Product Code: 0x%04X", menu_item.pscode.productCode);
+        text_consoleId[5] = GUI::Printf(10, 160, ConsoleIdInfo::GetProductCodeInfo(menu_item.pscode.productCode));
         
-        text_consoleId[6] = GUI::Printf(10, 190, "Product Sub Code: 0x%04X", pscode.productSubCode);
-        text_consoleId[7] = GUI::Printf(10, 210, ConsoleIdInfo::GetProductSubCodeInfo(pscode.productSubCode));
+        text_consoleId[6] = GUI::Printf(10, 190, "Product Sub Code: 0x%04X", menu_item.pscode.productSubCode);
+        text_consoleId[7] = GUI::Printf(10, 210, ConsoleIdInfo::GetProductSubCodeInfo(menu_item.pscode.productSubCode));
         
         GUI::SetBottomDialog(0, 1, Menus::ConsoleIdInfoHandler, 1);
         GUI::SetFade();
@@ -354,21 +360,21 @@ extern "C" int app_main(int argc, char *argv[]) {
         vlfGuiSetLanguage(PSP_SYSTEMPARAM_LANGUAGE_ENGLISH);
     }
         
-    *(u32 *)kirk = pspGetKirkVersion();
-    *(u32 *)spock = pspGetSpockVersion();
+    *(u32 *)menu_item.kirk = pspGetKirkVersion();
+    *(u32 *)menu_item.spock = pspGetSpockVersion();
     tachyon = pspGetTachyonVersion();
-    fuseid = pspGetFuseId();
-    fusecfg = pspGetFuseConfig();
-    scramble = pspNandGetScramble();
+    menu_item.fuseid = pspGetFuseId();
+    menu_item.fusecfg = pspGetFuseConfig();
+    menu_item.scramble = pspNandGetScramble();
     pspGetBaryonVersion(&baryon);
     pspGetPommelVersion(&pommel);
     pspGetPolestarVersion(&polestar);
     devkit = sceKernelDevkitVersion();
-    pspGetInitialFW(initial_fw);
-    pspChkregGetPsCode(&pscode);
-    sceOpenPSIDGetOpenPSID(&psid);
+    pspGetInitialFW(menu_item.initial_fw);
+    pspChkregGetPsCode(&menu_item.pscode);
+    sceOpenPSIDGetOpenPSID(&menu_item.psid);
     Utils::GetRegistryValue("/CONFIG/SYSTEM/XMB", "button_assign", &button_assign, 4, 1);
-    vertxt = SystemInfo::GetVersionTxt();
+    menu_item.vertxt = SystemInfo::GetVersionTxt();
     
     vlfGuiSystemSetup(1, 1, 1);
     vlfGuiAddEventHandler(PSP_CTRL_RTRIGGER, -1, GUI::OnBackgroundPlus, nullptr);
