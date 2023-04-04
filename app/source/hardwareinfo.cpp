@@ -94,12 +94,12 @@ namespace HardwareInfo {
         return "-";
     }
     
-    char *GetMotherboard(void) {
+    char *GetMotherboard(s32 *tachyon, s32 *baryon, s32 *pommel) {
         char initial_fw[8];
         char *ret_mobo = const_cast<char *>("-");
         
         for(unsigned int i = 0; i < sizeof(detmobo) / sizeof(Motherboard); i++) {
-            if (detmobo[i].tachyon == tachyon && (detmobo[i].baryon == baryon || detmobo[i].baryon == UNKNOWN) && (detmobo[i].pommel == pommel || detmobo[i].pommel == UNKNOWN)) {
+            if (detmobo[i].tachyon == *tachyon && (detmobo[i].baryon == *baryon || detmobo[i].baryon == UNKNOWN) && (detmobo[i].pommel == *pommel || detmobo[i].pommel == UNKNOWN)) {
                 /* TA-088v1(3.95) / TA-088v2 (4.01) */
                 if (i == 9 /* TA-088v1 */ && !strncmp(pspGetInitialFW(initial_fw), "4.01", 4)) {
                     continue;

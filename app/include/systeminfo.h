@@ -1,6 +1,6 @@
 #pragma once
 
 namespace SystemInfo {
-    char *GetFirmware(void);
+    char *GetFirmware(s32 *devkit);
     char *GetVersionTxt(void);
 }

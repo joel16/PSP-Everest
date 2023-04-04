@@ -3,25 +3,21 @@
 #include <pspkernel.h>
 #include <systemctrl.h>
 
-#include "main.h"
-#include "utils.h"
-#include "translate.h"
-
 int sctrlHENGetMinorVersion();
 
 namespace SystemInfo {
     static char get_firmware_buf[22], version_txt_buf[256];
 
-    const char *pspGetCFWName(void) {
+    const char *GetCFWName(s32 *devkit) {
         u32 hen_version = sctrlHENGetVersion();
         
-        if (devkit == 0x05000010) {
+        if (*devkit == 0x05000010) {
             return "m33";
         }
-        else if (devkit == 0x05000210) {
+        else if (*devkit == 0x05000210) {
             return "GEN";
         }
-        else if (devkit == 0x05000310) {
+        else if (*devkit == 0x05000310) {
             if (hen_version != 0x8002013A) {
                 return "GEN/MHU";
             }
@@ -29,10 +25,10 @@ namespace SystemInfo {
                 return "GEN/MHU";
             }
         }
-        else if (devkit == 0x05050010) {
+        else if (*devkit == 0x05050010) {
             return "GEN";
         }
-        else if (devkit == 0x06020010) {
+        else if (*devkit == 0x06020010) {
             if (static_cast<u32>(sctrlHENGetMinorVersion()) != 0x8002013A) {
                 if (hen_version == 0x00001001) {
                     return "PRO";
@@ -60,10 +56,10 @@ namespace SystemInfo {
                 return "TN-E";
             }
         }
-        else if (devkit == 0x06030110) {
+        else if (*devkit == 0x06030110) {
             return "PRO HEN";
         }
-        else if (devkit == 0x06030510) {
+        else if (*devkit == 0x06030510) {
             if (static_cast<u32>(sctrlHENGetMinorVersion()) != 0x8002013A) {
                 if (hen_version == 0x00001001) {
                     return "PRO";
@@ -79,16 +75,16 @@ namespace SystemInfo {
                 return "Custom";
             }
         }
-        else if (devkit == 0x06030610) {
+        else if (*devkit == 0x06030610) {
             return "PRO HEN";
         }
-        else if (devkit == 0x06030710 && hen_version == 0x00001000) {
+        else if (*devkit == 0x06030710 && hen_version == 0x00001000) {
             return "ME";
         }
-        else if (devkit == 0x06030810 && hen_version == 0x00001000) {
+        else if (*devkit == 0x06030810 && hen_version == 0x00001000) {
             return "ME";
         }
-        else if (devkit == 0x06030910) {
+        else if (*devkit == 0x06030910) {
             if (static_cast<u32>(sctrlHENGetMinorVersion()) != 0x8002013A) {
                 if (hen_version == 0x00001001) {
                     return "PRO";
@@ -107,7 +103,7 @@ namespace SystemInfo {
                 return "TN-A";
             }
         }
-        else if (devkit == 0x06060010) {
+        else if (*devkit == 0x06060010) {
             if (static_cast<u32>(sctrlHENGetMinorVersion()) != 0x8002013A) {
                 if (hen_version == 0x00001001) {
                     return "PRO";
@@ -123,7 +119,7 @@ namespace SystemInfo {
                 return "ME";
             }
         }
-        else if (devkit == 0x06060110) {
+        else if (*devkit == 0x06060110) {
             if (static_cast<u32>(sctrlHENGetMinorVersion()) != 0x8002013A) {
                 if (hen_version == 0x00001001) {
                     return "PRO";
@@ -143,9 +139,9 @@ namespace SystemInfo {
         return "";
     }
     
-    char *GetFirmware(void) {
-        char *devkit_chr = (char *)&devkit;
-        snprintf(get_firmware_buf, 22, "%i.%i%i %s", devkit_chr[3], devkit_chr[2], devkit_chr[1], pspGetCFWName());
+    char *GetFirmware(s32 *devkit) {
+        char *devkit_chr = (char *)&(*devkit);
+        snprintf(get_firmware_buf, 22, "%i.%i%i %s", devkit_chr[3], devkit_chr[2], devkit_chr[1], SystemInfo::GetCFWName(devkit));
         return get_firmware_buf;
     }
     
