@@ -83,7 +83,7 @@ namespace Menus {
     
     int BatteryInfoHandler(int enter) {
         battery_break = true;
-        return Menus::SubMenuHandler(enter, battery_break, 0, NULL, 1);
+        return Menus::SubMenuHandler(enter, battery_break, 0, nullptr, 1);
     }
     
     int SystemInfoHandler(int enter) {
@@ -124,7 +124,7 @@ namespace Menus {
         text_hardware[18] = GUI::Printf(250, 200, trans->hardware.nandsize, (pspNandGetPageSize() * pspNandGetPagesPerBlock() * pspNandGetTotalBlocks()) / 1024 / 1024);
         text_hardware[19] = GUI::Printf(250, 220, "QA Flag: %s", HardwareInfo::GetQAFlag());
         
-        GUI::SetBottomDialog(0, 1, Menus::HardwareInfoHandler, 1);
+        GUI::SetBottomDialog(false, true, Menus::HardwareInfoHandler, true);
         GUI::SetFade();
     }
     
@@ -213,7 +213,7 @@ namespace Menus {
             }
             
             if (!update) {
-                GUI::SetBottomDialog(0, 1, Menus::BatteryInfoHandler, 0);
+                GUI::SetBottomDialog(false, true, Menus::BatteryInfoHandler, false);
                 GUI::SetFade();
             }
             
@@ -267,7 +267,7 @@ namespace Menus {
         }
         
         vlfGuiSetTextFontSize(text_system[6], 0.75f);
-        GUI::SetBottomDialog(0, 1, Menus::SystemInfoHandler, 1);
+        GUI::SetBottomDialog(false, true, Menus::SystemInfoHandler, true);
         GUI::SetFade();
     }
     
@@ -287,7 +287,7 @@ namespace Menus {
         text_consoleId[6] = GUI::Printf(10, 190, "Product Sub Code: 0x%04X", menu_item.pscode.productSubCode);
         text_consoleId[7] = GUI::Printf(10, 210, ConsoleIdInfo::GetProductSubCodeInfo(menu_item.pscode.productSubCode));
         
-        GUI::SetBottomDialog(0, 1, Menus::ConsoleIdInfoHandler, 1);
+        GUI::SetBottomDialog(false, true, Menus::ConsoleIdInfoHandler, true);
         GUI::SetFade();
     }
 
@@ -349,7 +349,7 @@ namespace Menus {
         };
         
         vlfGuiCentralMenu(NUM_DEL_ITEMS_MAIN, main_menu_items, select, Menus::MainMenuHandler, 0, 0);
-        GUI::SetBottomDialog(1, 0, Menus::MainMenuHandler, 0);
+        GUI::SetBottomDialog(true, false, Menus::MainMenuHandler, false);
     }
 }
 

@@ -7,7 +7,7 @@ extern unsigned int button_assign;
 extern VlfPicture pic_button_assign;
 
 namespace GUI {
-    void SetBottomDialog(int enter, int back, int (* handler)(int enter), int delete_bd);
+    void SetBottomDialog(bool enter, bool back, int (* handler)(int enter), bool delete_bd);
     void SetTitle(const char *text);
     void SetFade(void);
     void GenRandomBackground(void);

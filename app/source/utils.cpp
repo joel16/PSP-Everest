@@ -93,7 +93,7 @@ namespace Utils {
                 
                 if (!sceRegGetKeyInfo(hd, name, &hk, &type, &size)) {
                     if (!sceRegGetKeyValue(hd, hk, buf, bufsize)) {
-                        ret = inttype ? 1 : (int)buf;
+                        ret = inttype ? 1 : reinterpret_cast<int>(buf);
                         sceRegFlushCategory(hd);
                     }
                 }
