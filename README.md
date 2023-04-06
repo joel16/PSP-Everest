@@ -3,7 +3,7 @@
 # Description:
 PSP Everest is an application similar to PSPident that displays more information about your PSP Console, using the native PSP UI (VLF). This is a mod of the original PSP Everest 2 by frostegater. This application has been built with the latest toolchain with major changes to display various new info and fix a few bugs.
 
-# Changes PSP Everest 2 Rev 6 +
+# Changes PSP Everest 2 Rev 6 + (forked version)
 - Built with the latest toolchain, with upstream GCC and newlib patches.
 - New Console ID Information page:
   - Display PSID.
@@ -12,9 +12,10 @@ PSP Everest is an application similar to PSPident that displays more information
   - Display product code and info.
   - Display product sub code and info.
 - Battery Information page now displays the following information:
-  - Display battery elec value (Not entirely sure what unit the raw value is)
-  - Display battery total elec value (Not entirely sure what unit the raw value is)
+  - Display battery elec value
+  - Display battery total elec value
 - Display polestar version in Hardware Information page.
+- Display QA flag in Hardware Information page.
 - Fix static title bar colour when changing background colours with L/R.
 - Make use of VLFlib's central menu instead of hard coding positions for the main menu.
 - Major code clean-up, eliminated all warnings, prevent overflows, limiting buffer lenghts etc.
