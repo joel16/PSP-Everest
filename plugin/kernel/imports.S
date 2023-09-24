@@ -1,12 +1,10 @@
     .set noreorder
 
-#include "pspstub.s"
-    
-    STUB_START "SystemCtrlForKernel",0x00090000,0x00010005
-    STUB_FUNC  0x159AF5CC,sctrlHENFindFunction
-    STUB_END
+#include "pspimport.s"
 
-    STUB_START "sceChkreg_driver",0x00090000,0x00010005
-    STUB_FUNC  0x59F8491D,sceChkregGetPsCode
-    STUB_FUNC  0x6894A027,sceChkregGetPsFlags
-    STUB_END
+    IMPORT_START "SystemCtrlForKernel",0x00090011
+    IMPORT_FUNC  "SystemCtrlForKernel",0x159AF5CC,sctrlHENFindFunction
+
+    IMPORT_START "sceChkreg_driver",0x00090011
+    IMPORT_FUNC  "sceChkreg_driver",0x59F8491D,sceChkregGetPsCode
+    IMPORT_FUNC  "sceChkreg_driver",0x6894A027,sceChkregGetPsFlags
