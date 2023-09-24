@@ -21,7 +21,7 @@ PSP Everest is an application similar to PSPident that displays more information
 - Major code clean-up, eliminated all warnings, prevent overflows, limiting buffer lenghts etc.
 
 # Credits:
-frostegater, jas0nuk, Yoti, raing3, Total_Noob, some1, m0skit0, TyRaNiD, ErikPshat, vit9696, rewind83.
+frostegater, jas0nuk, Yoti, raing3, Total_Noob, some1, m0skit0, TyRaNiD, ErikPshat, vit9696, rewind83 and psdevwiki contributors.
 
 # Tested:
 - PSP-E1000 (TA-096)
