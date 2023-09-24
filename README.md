@@ -15,6 +15,7 @@ PSP Everest is an application similar to PSPident that displays more information
   - Display battery elec value
   - Display battery total elec value
 - Display polestar version in Hardware Information page.
+- Identify TMU-00X, TA-079v1-v5, TA-095v3, TA-095v4 and TA-097 motherboards.
 - Display QA flag in Hardware Information page.
 - Fix static title bar colour when changing background colours with L/R.
 - Make use of VLFlib's central menu instead of hard coding positions for the main menu.

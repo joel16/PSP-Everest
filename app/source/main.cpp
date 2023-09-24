@@ -338,7 +338,7 @@ namespace Menus {
     }
     
     void MainMenu(int select) {
-        GUI::SetTitle("PSP EVEREST 2 Rev 7");
+        GUI::SetTitle("PSP EVEREST 2 Rev 8");
         
         const char *main_menu_items[] = {
             "Hardware Information",
