@@ -25,9 +25,14 @@ namespace HardwareInfo {
     
     Motherboard detmobo[] = {
         /* PSP-100x */
-        { 0x00140000, 0x00030600, 0x00000103, "TA-079v1" },
-        { 0x00200000, 0x00030600, 0x00000103, "TA-079v2" },
-        { 0x00200000, 0x00040600, 0x00000103, "TA-079v3" },
+        { 0x00140000, 0x00020601, 0x00000103, "TMU-001" },
+        { 0x00140000, 0x00030601, 0x00000103, "TMU-002" },
+        { 0x00140000, 0x00030601, 0x00000104, "TMU-002" },
+        { 0x00140000, 0x00010600, 0x00000103, "TA-079v1" },
+        { 0x00140000, 0x00020600, 0x00000103, "TA-079v2" },
+        { 0x00140000, 0x00030600, 0x00000103, "TA-079v3" },
+        { 0x00200000, 0x00030600, 0x00000103, "TA-079v4" },
+        { 0x00200000, 0x00040600, 0x00000103, "TA-079v5" },
         { 0x00300000, 0x00040600, 0x00000103, "TA-081v1" },
         { 0x00300000, 0x00040600, 0x00000104, "TA-081v2" },
         { 0x00400000, 0x00114000, 0x00000112, "TA-082" },
@@ -36,8 +41,7 @@ namespace HardwareInfo {
         /* PSP-200x */
         { 0x00500000, 0x0022B200, 0x00000123, "TA-085v1" },
         { 0x00500000, 0x00234000, 0x00000123, "TA-085v2" },
-        { 0x00500000, 0x00243000, 0x00000123, "TA-088v1" },// >----| If initial FW: 4.01, skipped TA-088v1...
-        { 0x00500000, 0x00243000, 0x00000123, "TA-088v2" },// <----| ...and detected TA-088v2.
+        { 0x00500000, 0x00243000, 0x00000123, "TA-088vX" },
         { 0x00600000, 0x00243000, 0x00000123, "TA-088v3" },
         { 0x00500000, 0x00243000, 0x00000132, "TA-090v1" },
         
@@ -49,16 +53,15 @@ namespace HardwareInfo {
         { 0x00810000, 0x002C4000, 0x00000143, "TA-093v2" },
         { 0x00810000, 0x002E4000, 0x00000154, "TA-095v1" },
         { 0x00820000, 0x002E4000, 0x00000154, "TA-095v2" },
+        { 0x00810000, 0x012E4000, 0x00000154, "TA-095v3" },
+        { 0x00820000, 0x012E4000, 0x00000154, "TA-095v4" },
         
         /* PSP-N100x (PSPgo) */
         { 0x00720000, 0x00304000, 0x00000133, "TA-091" },
-        { 0x00800000, 0x002A0000, UNKNOWN, "TA-094" },
+        // { 0x00800000, 0x002A0000, UNKNOWN, "TA-094" }, // Not sure about this one
         
         /* PSP-E100x (PSP Essentials aka PSP Street) */
-        { 0x00900000, 0x00403000, 0x00000154, "TA-096" },
-        
-        /* DTP-T1000A */
-        { 0x00100000, UNKNOWN, UNKNOWN, "Devkit" },
+        { 0x00900000, 0x00403000, 0x00000154, "TA-096" }
     };
 
     int GetModelSymbol(void) {
@@ -100,15 +103,27 @@ namespace HardwareInfo {
         
         for(unsigned int i = 0; i < sizeof(detmobo) / sizeof(Motherboard); i++) {
             if (detmobo[i].tachyon == *tachyon && (detmobo[i].baryon == *baryon || detmobo[i].baryon == UNKNOWN) && (detmobo[i].pommel == *pommel || detmobo[i].pommel == UNKNOWN)) {
-                /* TA-088v1(3.95) / TA-088v2 (4.01) */
-                if (i == 9 /* TA-088v1 */ && !strncmp(pspGetInitialFW(initial_fw), "4.01", 4)) {
-                    continue;
+                // TA-088v1 / TA-088v2 logic
+                if (i == 14) {
+                    if ((strncmp(pspGetInitialFW(initial_fw), "3.71", 4) == 0) || (strncmp(pspGetInitialFW(initial_fw), "3.90", 4) == 0)) {
+                        ret_mobo = const_cast<char *>("TA-088v1");
+                    }
+                    else {
+                        ret_mobo = const_cast<char *>("TA-088v2");
+                    }
                 }
-                else if (i == 10 /* TA-088v2 */ && strncmp(pspGetInitialFW(initial_fw), "3.95", 4)) {
-                    ret_mobo = const_cast<char *>("TA-088v1/v2");
+                // TA-096 / TA-097 logic
+                else if (i == 27) {
+                    if (strncmp(pspGetInitialFW(initial_fw), "6.50", 4) == 0) {
+                        ret_mobo = const_cast<char *>("TA-096");
+                    }
+                    else {
+                        ret_mobo = const_cast<char *>("TA-097");
+                    }
                 }
-                
-                ret_mobo = const_cast<char *>(detmobo[i].mobo_name);
+                else {
+                    ret_mobo = const_cast<char *>(detmobo[i].mobo_name);
+                }
             }
         }
         
