@@ -58,7 +58,8 @@ namespace HardwareInfo {
         
         /* PSP-N100x (PSPgo) */
         { 0x00720000, 0x00304000, 0x00000133, "TA-091" },
-        // { 0x00800000, 0x002A0000, UNKNOWN, "TA-094" }, // Not sure about this one
+        { 0x00810000, 0x00323100, 0x00000141, "TA-094v1" },
+        { 0x00810000, 0x00324000, 0x00000143, "TA-094v2" },
         
         /* PSP-E100x (PSP Essentials aka PSP Street) */
         { 0x00900000, 0x00403000, 0x00000154, "TA-096" }
