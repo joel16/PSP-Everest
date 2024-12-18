@@ -62,7 +62,7 @@ namespace HardwareInfo {
         { 0x00810000, 0x00324000, 0x00000143, "TA-094v2" },
         
         /* PSP-E100x (PSP Essentials aka PSP Street) */
-        { 0x00900000, 0x00403000, 0x00000154, "TA-096" }
+        { 0x00900000, 0x00403000, 0x00000154, "TA-09X" }
     };
 
     int GetModelSymbol(void) {
@@ -114,7 +114,7 @@ namespace HardwareInfo {
                     }
                 }
                 // TA-096 / TA-097 logic
-                else if (i == 27) {
+                else if (i == 29) {
                     if (strncmp(pspGetInitialFW(initial_fw), "6.50", 4) == 0) {
                         ret_mobo = const_cast<char *>("TA-096");
                     }
