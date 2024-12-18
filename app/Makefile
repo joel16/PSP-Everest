@@ -23,7 +23,7 @@ LDFLAGS = -nostdlib -nodefaultlibs
 LIBS = -lpspmodinfo -lpspopenpsid -lpsprtc -lpsppower -lpspreg -lvlfgui -lvlfgu -lvlfutils -lvlflibc
 
 EXTRA_TARGETS = EBOOT.PBP
-PSP_EBOOT_TITLE = PSP EVEREST 2 Rev 8
+PSP_EBOOT_TITLE = PSP EVEREST 2 Rev 9
 PSP_EBOOT_ICON = ICON0.PNG
 PSP_EBOOT_PIC1 = PIC1.png
 
