@@ -2,7 +2,7 @@
 
 #include "vlf.h"
 
-extern bool battery_fade_ctrl;
+extern bool fadeCtrl;
 extern unsigned int button_assign;
 extern VlfPicture pic_button_assign;
 

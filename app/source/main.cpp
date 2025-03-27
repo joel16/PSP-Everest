@@ -14,6 +14,7 @@
 #include "hardwareinfo.h"
 #include "kernel.h"
 #include "main.h"
+#include "miscinfo.h"
 #include "screenshot.h"
 #include "systeminfo.h"
 #include "translate.h"
@@ -44,23 +45,33 @@ static MenuItem menu_item = { 0 };
 int psp_model = 0, language = 0;
 
 namespace Menus {
-    static constexpr u8 NUM_DEL_ITEMS_MAIN = 5;
+    static constexpr u8 NUM_DEL_ITEMS_MAIN = 6;
     static constexpr u8 NUM_DEL_ITEMS_HARDWARE = 20;
     static constexpr u8 NUM_DEL_ITEMS_BATTERY = 14;
     static constexpr u8 NUM_DEL_ITEMS_SYSTEM = 7;
     static constexpr u8 NUM_DEL_ITEMS_CONSOLEID = 8;
+    static constexpr u8 NUM_DEL_ITEMS_MISC = 1;
 
     static u8 menu = 0;
-    static bool battery_break = false;
+    static bool clear = false;
     static u16 bserialdata[2], serialdata[2];
     static VlfText text_hardware[NUM_DEL_ITEMS_HARDWARE], text_battery[NUM_DEL_ITEMS_BATTERY],
-        text_system[NUM_DEL_ITEMS_SYSTEM], text_consoleId[NUM_DEL_ITEMS_CONSOLEID];
+        text_system[NUM_DEL_ITEMS_SYSTEM], text_consoleId[NUM_DEL_ITEMS_CONSOLEID], text_misc[NUM_DEL_ITEMS_MISC];
+        
+    enum PageState {
+        HARDWARE_INFO_PAGE,
+        BATTERY_INFO_PAGE,
+        SOFTWARE_INFO_PAGE,
+        CONSOLE_ID_INFO_PAGE,
+        MISC_INFO_PAGE,
+        EXIT
+    };
 
     void MainMenu(int select);
 
-    int SubMenuHandler(int enter, bool battery_break, int max_items, VlfText *items, int selection) {
+    int SubMenuHandler(int enter, bool clear, int max_items, VlfText *items, int selection) {
         if (!enter) {
-            if (!battery_break) {
+            if (!clear) {
                 for(int i = 0; i < max_items; i++) {
                     vlfGuiRemoveText(items[i]);
                 }
@@ -78,12 +89,12 @@ namespace Menus {
     }
 
     int HardwareInfoHandler(int enter) {
-        return Menus::SubMenuHandler(enter, false, NUM_DEL_ITEMS_HARDWARE, text_hardware, 0);
+        return Menus::SubMenuHandler(enter, false, NUM_DEL_ITEMS_HARDWARE, text_hardware, HARDWARE_INFO_PAGE);
     }
     
     int BatteryInfoHandler(int enter) {
-        battery_break = true;
-        return Menus::SubMenuHandler(enter, battery_break, 0, nullptr, 1);
+        clear = true;
+        return Menus::SubMenuHandler(enter, clear, 0, nullptr, BATTERY_INFO_PAGE);
     }
     
     int SystemInfoHandler(int enter) {
@@ -92,11 +103,16 @@ namespace Menus {
             pic_button_assign = nullptr;
         }
 
-        return Menus::SubMenuHandler(enter, false, NUM_DEL_ITEMS_SYSTEM, text_system, 2);
+        return Menus::SubMenuHandler(enter, false, NUM_DEL_ITEMS_SYSTEM, text_system, SOFTWARE_INFO_PAGE);
     }
     
     int ConsoleIdInfoHandler(int enter) {
-        return Menus::SubMenuHandler(enter, false, NUM_DEL_ITEMS_CONSOLEID, text_consoleId, 3);
+        return Menus::SubMenuHandler(enter, false, NUM_DEL_ITEMS_CONSOLEID, text_consoleId, CONSOLE_ID_INFO_PAGE);
+    }
+
+    int MiscInfoHandler(int enter) {
+        clear = true;
+        return Menus::SubMenuHandler(enter, false, NUM_DEL_ITEMS_MISC, text_misc, MISC_INFO_PAGE);
     }
     
     void HardwareInfo(void) {
@@ -139,14 +155,14 @@ namespace Menus {
         vlfGuiCancelBottomDialog();
         GUI::SetTitle(trans->battery_title);
         
-        battery_fade_ctrl = false;
+        fadeCtrl = false;
         bool first_cycle = true;
         
         for(int update = 0;; update++) {
-            if (update == 25 || battery_fade_ctrl) {
+            if (update == 25 || fadeCtrl) {
                 update = 1;
-                first_cycle = battery_fade_ctrl;
-                battery_fade_ctrl = false;
+                first_cycle = fadeCtrl;
+                fadeCtrl = false;
             }
             
             vlfGuiDrawFrame();
@@ -219,7 +235,7 @@ namespace Menus {
             
             vlfGuiDrawFrame();
             
-            if (battery_break) {
+            if (clear) {
                 for(int i = 0; i < NUM_DEL_ITEMS_BATTERY; i++) {
                     if (text_battery[i] != nullptr) {
                         vlfGuiRemoveText(text_battery[i]);
@@ -291,6 +307,52 @@ namespace Menus {
         GUI::SetFade();
     }
 
+    void MiscInfo(void) {
+        GUI::SetTitle("Miscellaneous Information");
+
+        fadeCtrl = false;
+        bool firstCycle = true;
+        
+        for(int update = 0;; update++) {
+            if (update == 25 || fadeCtrl) {
+                update = 1;
+                firstCycle = fadeCtrl;
+                fadeCtrl = false;
+            }
+            
+            vlfGuiDrawFrame();
+            
+            if (!firstCycle || update == 0) {
+                for(int i = 0; i < NUM_DEL_ITEMS_MISC; i++) {
+                    if (text_misc[i] != nullptr) {
+                        vlfGuiRemoveText(text_misc[i]);
+                        text_misc[i] = nullptr;
+                    }
+                }
+                
+                text_misc[0] = GUI::Printf(10, 40, "Headphone status: %s", MiscInfo::GetHeadphoneStatus());
+            }
+
+            if (!update) {
+                GUI::SetBottomDialog(false, true, Menus::MiscInfoHandler, false);
+                GUI::SetFade();
+            }
+            
+            vlfGuiDrawFrame();
+            
+            if (clear) {
+                for(int i = 0; i < NUM_DEL_ITEMS_MISC; i++) {
+                    if (text_misc[i] != nullptr) {
+                        vlfGuiRemoveText(text_misc[i]);
+                        text_misc[i] = nullptr;
+                    }
+                }
+                
+                break;
+            }
+        }
+    }
+
     int Capture(void *param) {
         Screenshot::Capture(menu);
         return VLF_EV_RET_NOTHING;
@@ -304,32 +366,39 @@ namespace Menus {
     
     int MainMenuHandler(int select) {
         switch(select) {
-            case 0:
+            case HARDWARE_INFO_PAGE:
                 vlfGuiCancelCentralMenu();
                 Menus::HardwareInfo();
                 Menus::HandleScreenshot(select);
                 break;
                 
-            case 1:
+            case BATTERY_INFO_PAGE:
                 vlfGuiCancelCentralMenu();
-                battery_break = false;
+                clear = false;
                 Menus::HandleScreenshot(select);
                 Menus::BatteryInfo();
                 break;
                 
-            case 2:
+            case SOFTWARE_INFO_PAGE:
                 vlfGuiCancelCentralMenu();
                 Menus::SystemInfo();
                 Menus::HandleScreenshot(select);
                 break;
                 
-            case 3:
+            case CONSOLE_ID_INFO_PAGE:
                 vlfGuiCancelCentralMenu();
                 Menus::ConsoleIdInfo();
                 Menus::HandleScreenshot(select);
                 break;
                 
-            case 4:
+            case MISC_INFO_PAGE:
+                vlfGuiCancelCentralMenu();
+                clear = false;
+                Menus::HandleScreenshot(select);
+                Menus::MiscInfo();
+                break;
+                
+            case EXIT:
                 sceKernelExitGame();
                 break;
         }
@@ -345,6 +414,7 @@ namespace Menus {
             "Battery Information",
             "Software Information",
             "Console ID Information",
+            "Miscellaneous Information",
             "Exit"
         };
         

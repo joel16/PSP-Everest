@@ -5,7 +5,7 @@
 #include "gui.h"
 #include "utils.h"
 
-bool battery_fade_ctrl = false;
+bool fadeCtrl = false;
 unsigned int button_assign = 0;
 VlfPicture pic_button_assign;
 
@@ -70,14 +70,14 @@ namespace GUI {
     
     int OnBackgroundPlus(void *param) {
         background_number++;
-        battery_fade_ctrl = true;
+        fadeCtrl = true;
         GUI::SetBackground();
         return VLF_EV_RET_NOTHING;
     }
     
     int OnBackgroundMinus(void *param) {
         background_number--;
-        battery_fade_ctrl = true;
+        fadeCtrl = true;
         GUI::SetBackground();
         return VLF_EV_RET_NOTHING;
     }

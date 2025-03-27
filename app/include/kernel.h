@@ -43,6 +43,7 @@ int pspChkregGetPsFlags(u8 *psFlags, s32 index);
 int pspSysconBatteryGetElec(int *elec);
 int pspSysconBatteryGetTotalElec(int *elec);
 int pspGetModel(void);
+s8 pspGetHPConnect(void);
 
 #if defined (__cplusplus)
 }

@@ -29,6 +29,7 @@ int sceSyscon_driver_4C539345(int *elec);     // sceSysconBatteryGetTotalElec
 static int (*sceUtilsBufferCopyWithRange)(u8 *outbuff, int outsize, u8 *inbuff, int insize, int cmd);
 s32 sceChkregGetPsCode(ScePsCode *pPsCode);
 s32 sceChkregGetPsFlags(u8 *pPsFlags, s32 index);
+s8 sceSysconGetHPConnect(void);
 
 static int _sceUtilsBufferCopyWithRange(u8 *outbuff, int outsize, u8 *inbuff, int insize, int cmd) {
     return (*sceUtilsBufferCopyWithRange)(outbuff, outsize, inbuff, insize, cmd);
@@ -327,6 +328,13 @@ int pspSysconBatteryGetTotalElec(int *elec) {
 int pspGetModel(void) {
     int k1 = pspSdkSetK1(0);
     int ret = sceKernelGetModel();
+    pspSdkSetK1(k1);
+    return ret;
+}
+
+s8 pspGetHPConnect(void) {
+    int k1 = pspSdkSetK1(0);
+    s8 ret = sceSysconGetHPConnect();
     pspSdkSetK1(k1);
     return ret;
 }
