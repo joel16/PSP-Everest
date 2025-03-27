@@ -21,7 +21,7 @@
 #include "utils.h"
 #include "vlf.h"
 
-PSP_MODULE_INFO("PSP EVEREST 2 Rev 9", PSP_MODULE_USER, 2, 7);
+PSP_MODULE_INFO("PSP EVEREST 2 Rev 10", PSP_MODULE_USER, 2, 10);
 PSP_MAIN_THREAD_ATTR(0);
 
 typedef struct {
