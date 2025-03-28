@@ -133,54 +133,55 @@ int pspIdStorageLookup(u16 key, u32 offset, void *buf, u32 len) {
     return ret;
 }
 
-/*
-0x03 - Japan
-0x04 - America
-0x05 - Europe
-0x06 - Korea
-0x07 - United Kingdom
-0x08 - Mexico
-0x09 - Australia
-0x0A - Hong-Kong
-0x0B - Taiwan
-0x0C - Russia
-0x0D - China
-*/
 int pspGetRegion(void) {
-    u8 region[1];
-    pspIdStorageLookup(0x100, 0x3D, region, 1);
-    
-    if (region[0] == 0x03)      // Japan
-        return 0;
-    else if (region[0] == 0x04) // America
-        return 1;
-    else if (region[0] == 0x09) // Australia
-        return 2;
-    else if (region[0] == 0x07) // United Kingdom
-        return 3;
-    else if (region[0] == 0x05) // Europe
-        return 4;
-    else if (region[0] == 0x06) // Korea
-        return 5;
-    else if (region[0] == 0x0A) // Hong-Kong
-        return 6;
-    else if (region[0] == 0x0B) // Taiwan
-        return 7;
-    else if (region[0] == 0x0C) // Russia
-        return 8;
-    else if (region[0] == 0x0D) // China
-        return 9;
-    else if (region[0] == 0x08) // Mexico
-        return 10;
-    else
-        return -1;
+    u8 region;
+    pspIdStorageLookup(0x100, 0x3D, &region, 1);
+
+    switch (region) {
+        case 0x03: 
+            return 0;  // Japan
+        
+        case 0x04: 
+            return 1;  // America
+        
+        case 0x09: 
+            return 2;  // Australia
+        
+        case 0x07: 
+            return 3;  // United Kingdom
+        
+        case 0x05: 
+            return 4;  // Europe
+        
+        case 0x06: 
+            return 5;  // Korea
+        
+        case 0x0A: 
+            return 6;  // Hong-Kong
+        
+        case 0x0B: 
+            return 7;  // Taiwan
+        
+        case 0x0C: 
+            return 8;  // Russia
+        
+        case 0x0D: 
+            return 9;  // China
+        
+        case 0x08: 
+            return 10; // Mexico
+        
+        default:   
+            return -1; // Unknown region
+    }
 }
 
 char *pspGetInitialFW(char *buf) {
     pspIdStorageLookup(0x51, 0, buf, 5);
     
-    if (buf[0] == 0)
+    if (buf[0] == 0) {
         snprintf(buf, 2, "-");
+    }
     
     return buf;
 }
@@ -217,8 +218,9 @@ static u32 pspWriteBat(u8 addr, u16 data) {
     int res = 0;
     u8 param[0x60];
     
-    if (addr > 0x7F)
+    if (addr > 0x7F) {
         return(0x80000102);
+    }
         
     param[0x0C] = 0x73;
     param[0x0D] = 5;
@@ -227,8 +229,9 @@ static u32 pspWriteBat(u8 addr, u16 data) {
     param[0x10] = data >> 8;
     
     res = sceSysconCmdExec(param, 0);
-    if (res < 0)
+    if (res < 0) {
         return res;
+    }
         
     pspSdkSetK1(k1);
     return 0;
@@ -238,8 +241,9 @@ int pspWriteSerial(u16 *serial) {
     int err = 0;
     
     err = pspWriteBat(0x07, serial[0]);
-    if (!err)
+    if (!err) {
         err = pspWriteBat(0x09, serial[1]);
+    }
         
     return err;
 }
@@ -247,16 +251,18 @@ int pspWriteSerial(u16 *serial) {
 static u32 pspReadEEPROM(u8 addr) {
     u8 param[0x60];
     
-    if (addr > 0x7F)
+    if (addr > 0x7F) {
         return 0x80000102;
+    }
         
     param[0x0C] = 0x74;
     param[0x0D] = 3;
     param[0x0E] = addr;
     
     int res = sceSysconCmdExec(param, 0);
-    if (res < 0)
+    if (res < 0) {
         return res;
+    }
         
     return (param[0x21] << 8) | param[0x20];
 }
@@ -285,13 +291,16 @@ int pspReadSerial(u16 *pdata) {
         pdata[0] = (data & 0xFFFF);
         data = pspReadEEPROM(0x09);
         err = pspErrCheck(data);
-        if (err >= 0)
+        if (err >= 0) {
             pdata[1] = (data & 0xFFFF);
-        else
+        }
+        else {
             err = data;
+        }
     }
-    else
+    else {
         err = data;
+    }
         
     pspSdkSetK1(k1);
     return err;
