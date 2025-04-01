@@ -1,12 +1,11 @@
-#include <pspsdk.h>
-#include <pspkernel.h>
 #include <string.h>
 #include <stdio.h>
 #include <pspidstorage.h>
-#include <pspsysmem_kernel.h>
+#include <pspkernel.h>
 #include <pspnand_driver.h>
+#include <pspsyscon.h>
+#include <pspsysmem_kernel.h>
 #include <pspwlan.h>
-#include <pspsysmem.h>
 
 #include "systemctrl.h"
 #include "kernel.h"
@@ -16,9 +15,6 @@ PSP_MAIN_THREAD_ATTR(0);
 
 #define MAKE_CALL(f) (0x0C000000 | (((u32)(f) >> 2) & 0x03ffffff))
 
-s32 sceSysconGetBaryonVersion(s32 *baryon);
-s32 sceSysconGetPommelVersion(s32 *pommel);
-s32 sceSyscon_driver_FB148FB6(s32 *polestar); // sceSysconGetPolestarVersion
 u64 sceSysreg_driver_4F46EEDE(void);          // sceSysregGetFuseId
 u32 sceSysreg_driver_8F4F4E96(void);          // sceSysregGetFuseConfig
 int sceSysregKirkBusClockEnable(void);
@@ -29,7 +25,9 @@ int sceSyscon_driver_4C539345(int *elec);     // sceSysconBatteryGetTotalElec
 static int (*sceUtilsBufferCopyWithRange)(u8 *outbuff, int outsize, u8 *inbuff, int insize, int cmd);
 s32 sceChkregGetPsCode(ScePsCode *pPsCode);
 s32 sceChkregGetPsFlags(u8 *pPsFlags, s32 index);
-s8 sceSysconGetHPConnect(void);
+s8 sceSysconGetWlanSwitch(void);
+s8 sceSysconGetBtSwitch(void);
+s8 sceSysconGetHoldSwitch(void);
 
 static int _sceUtilsBufferCopyWithRange(u8 *outbuff, int outsize, u8 *inbuff, int insize, int cmd) {
     return (*sceUtilsBufferCopyWithRange)(outbuff, outsize, inbuff, insize, cmd);
@@ -46,64 +44,64 @@ static void pspSyncCache(void) {
     sceKernelDcacheWritebackInvalidateAll();
 }
 
-u32 pspGetBaryonVersion(s32 *baryon) {
+int pspGetBaryonVersion(int *baryon) {
     int k1 = pspSdkSetK1(0);
-    u32 err = sceSysconGetBaryonVersion(baryon);
+    int ret = sceSysconGetBaryonVersion(baryon);
     pspSdkSetK1(k1);
-    return err;
+    return ret;
 }
 
-u32 pspGetPommelVersion(s32 *pommel) {
+int pspGetPommelVersion(int *pommel) {
     int k1 = pspSdkSetK1(0);
-    u32 err = sceSysconGetPommelVersion(pommel);
+    int ret = sceSysconGetPommelVersion(pommel);
     pspSdkSetK1(k1);
-    return err;
+    return ret;
 }
 
 u32 pspGetTachyonVersion(void) {
     int k1 = pspSdkSetK1(0);
-    u32 err = sceSysregGetTachyonVersion();
+    u32 ret = sceSysregGetTachyonVersion();
     pspSdkSetK1(k1);
-    return err;
+    return ret;
 }
 
-u32 pspGetPolestarVersion(s32 *polestar) {
+int pspGetPolestarVersion(int *polestar) {
     int k1 = pspSdkSetK1(0);
-    u32 err = sceSyscon_driver_FB148FB6(polestar);
+    int ret = sceSysconGetPolestarVersion(polestar);
     pspSdkSetK1(k1);
-    return err;
+    return ret;
 }
 
 u64 pspGetFuseId(void) {
     int k1 = pspSdkSetK1(0);
-    u64 err = sceSysreg_driver_4F46EEDE();
+    u64 ret = sceSysreg_driver_4F46EEDE();
     pspSdkSetK1(k1);
-    return err;
+    return ret;
 }
 
 u32 pspGetFuseConfig(void) {
     int k1 = pspSdkSetK1(0);
-    u32 err = sceSysreg_driver_8F4F4E96();
+    u32 ret = sceSysreg_driver_8F4F4E96();
     pspSdkSetK1(k1);
-    return err;
+    return ret;
 }
 
 u32 pspGetKirkVersion(void) {
     int k1 = pspSdkSetK1(0);
     sceSysregKirkBusClockEnable();
     sceKernelDelayThread(1000);
-    u32 err = *(u32 *)0xBDE00004;
+    u32 ret = *(u32 *)0xBDE00004;
     pspSdkSetK1(k1);
-    return err;
+    return ret;
 }
 
 u32 pspGetSpockVersion(void) {
     int k1 = pspSdkSetK1(0);
     sceSysregAtaBusClockEnable();
     sceKernelDelayThread(1000);
-    u32 err = *(u32 *)0xBDF00004;
+    u32 ret = *(u32 *)0xBDF00004;
     pspSdkSetK1(k1);
-    return err;
+    return ret;
 }
 
 u32 pspNandGetScramble(void) {
@@ -238,14 +236,14 @@ static u32 pspWriteBat(u8 addr, u16 data) {
 }
 
 int pspWriteSerial(u16 *serial) {
-    int err = 0;
+    int ret = 0;
     
-    err = pspWriteBat(0x07, serial[0]);
-    if (!err) {
-        err = pspWriteBat(0x09, serial[1]);
+    ret = pspWriteBat(0x07, serial[0]);
+    if (!ret) {
+        ret = pspWriteBat(0x09, serial[1]);
     }
         
-    return err;
+    return ret;
 }
 
 static u32 pspReadEEPROM(u8 addr) {
@@ -344,6 +342,20 @@ int pspGetModel(void) {
 s8 pspGetHPConnect(void) {
     int k1 = pspSdkSetK1(0);
     s8 ret = sceSysconGetHPConnect();
+    pspSdkSetK1(k1);
+    return ret;
+}
+
+s8 pspGetWlanSwitch(void) {
+    int k1 = pspSdkSetK1(0);
+    s8 ret = sceSysconGetWlanSwitch();
+    pspSdkSetK1(k1);
+    return ret;
+}
+
+s8 pspGetHoldSwitch(void) {
+    int k1 = pspSdkSetK1(0);
+    s8 ret = sceSysconGetHoldSwitch();
     pspSdkSetK1(k1);
     return ret;
 }

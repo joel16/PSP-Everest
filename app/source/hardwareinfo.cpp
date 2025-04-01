@@ -66,7 +66,7 @@ namespace HardwareInfo {
     };
 
     int GetModelSymbol(void) {
-        switch(psp_model + 1) {
+        switch(model + 1) {
             case 1:
             case 5:
             case 11:
@@ -151,7 +151,7 @@ namespace HardwareInfo {
     
     const char *GetModel(void) {
         const char *models[] = { "PSP Fat", "PSP Slim", "PSP Brite", "PSP Brite", "PSPgo", "-", "PSP Brite", "-", "PSP Brite", "-", "PSP Street" };
-        return models[psp_model];
+        return models[model];
     }
 
     const char *GetQAFlag(void) {

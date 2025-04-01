@@ -79,9 +79,9 @@ int start_thread(SceSize args, void *argp) {
     LoadStartModuleBuffer("intraFont.prx", intraFont_prx_start, intraFont_prx_size, args, argp);
     LoadStartModuleBuffer("vlf.prx", vlf_prx_start, vlf_prx_size, args, argp);
 
-    psp_model = pspGetModel();
+    model = pspGetModel();
 
-    if (psp_model != 4) {
+    if (model != 4) {
         LoadStartModuleBuffer("kumdman.prx", kumdman_prx_start, kumdman_prx_size, args, argp);
     }
 

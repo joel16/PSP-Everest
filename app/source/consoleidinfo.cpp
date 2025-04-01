@@ -1,11 +1,11 @@
 #include <cstdio>
 #include <pspkernel.h>
 
-#include "consoleidinfo.h"
+#include "info.h"
 
 // Info from https://github.com/CelesteBlue-dev/PS-ConsoleId-wiki/blob/master/PS-ConsoleId-wiki.txt
 namespace ConsoleIdInfo {
-    const char *GetProductCodeInfo(u16 productCode) {
+    const char *GetProductCode(u16 productCode) {
         const char *product_codes[] = {
             "Test - Prototype / Test Unit",
             "Tool - DevKit / Development Tool",
@@ -31,7 +31,7 @@ namespace ConsoleIdInfo {
         return "-";
     }
     
-    const char *GetProductSubCodeInfo(u16 productSubCode) {
+    const char *GetProductSubCode(u16 productSubCode) {
         const char *product_sub_codes[] = {
             "-",
             "TA-079 / TA-081, TMU-002",
@@ -52,7 +52,7 @@ namespace ConsoleIdInfo {
         return "-";
     }
     
-    const char *GetFactoryCodeInfo(u16 factoryCode) {
+    const char *GetFactoryCode(u16 factoryCode) {
         const char *factory_codes[] {
             "Invalid: PSP Kicho & Dencho Program",
             "-",
