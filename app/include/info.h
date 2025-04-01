@@ -12,7 +12,7 @@ namespace ConsoleIdInfo {
 namespace HardwareInfo {
     int GetModelSymbol(void);
     const char *GetRegion(void);
-    char *GetMotherboard(s32 *tachyon, s32 *baryon, s32 *pommel);
+    char *GetMotherboard(s32 *tachyon, int *baryon, int *pommel);
     char *GetUMDFirmware(void);
     char *GetMacAddress(void);
     const char *GetModel(void);
@@ -21,6 +21,8 @@ namespace HardwareInfo {
 
 namespace MiscInfo {
     const char *GetHeadphoneStatus(void);
+    const char *GetWlanSwitchState(void);
+    const char *GetHoldSwitchState(void);
 }
 
 namespace SystemInfo {

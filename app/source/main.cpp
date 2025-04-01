@@ -26,9 +26,9 @@ typedef struct {
     char kirk[4];
     char spock[4];
     s32 tachyon;
-    s32 baryon;
-    s32 pommel;
-    s32 polestar;
+    int baryon;
+    int pommel;
+    int polestar;
     s32 devkit;
     u32 fusecfg;
     u32 scramble;
@@ -36,9 +36,9 @@ typedef struct {
     PspOpenPSID psid;
     ScePsCode pscode;
     char *versionTxt;
-} MenuItem;
+} GuiData;
 
-static MenuItem menu_item = { 0 };
+static GuiData guiData = { 0 };
 int model = 0, language = 0;
 
 namespace Menus {
@@ -47,7 +47,7 @@ namespace Menus {
     static constexpr u8 NUM_ITEMS_BATTERY = 14;
     static constexpr u8 NUM_ITEMS_SYSTEM = 7;
     static constexpr u8 NUM_ITEMS_CONSOLEID = 8;
-    static constexpr u8 NUM_ITEMS_MISC = 1;
+    static constexpr u8 NUM_ITEMS_MISC = 4;
 
     static u8 menu = 0;
     static bool clear = false;
@@ -109,30 +109,30 @@ namespace Menus {
 
     int MiscInfoHandler(int enter) {
         clear = true;
-        return Menus::SubMenuHandler(enter, false, NUM_ITEMS_MISC, miscText, MISC_INFO_PAGE);
+        return Menus::SubMenuHandler(enter, clear, 0, nullptr, MISC_INFO_PAGE);
     }
     
     void HardwareInfo(void) {
         GUI::SetTitle(trans->hardware_title);
         
-        hardwareText[0] = GUI::Printf(10, 40, "Tachyon: 0x%08X", menu_item.tachyon);
-        hardwareText[1] = GUI::Printf(10, 60, "Baryon: 0x%08X", menu_item.baryon);
-        hardwareText[2] = GUI::Printf(10, 80, "Pommel: 0x%08X", menu_item.pommel);
-        hardwareText[3] = GUI::Printf(10, 100, "Polestar: 0x%08X", menu_item.polestar);
-        hardwareText[4] = GUI::Printf(10, 120, "FuseID: 0x%llX", menu_item.fuseid);
-        hardwareText[5] = GUI::Printf(10, 140, "FuseCFG: 0x%08X", menu_item.fusecfg);
-        hardwareText[6] = GUI::Printf(10, 160, "IDScramble: 0x%08X", menu_item.scramble);
-        hardwareText[7] = GUI::Printf(10, 180, "Kirk: %c%c%c%c", menu_item.kirk[3], menu_item.kirk[2], menu_item.kirk[1], menu_item.kirk[0]);
-        hardwareText[8] = GUI::Printf(10, 200, model == 4 ? "Spock: -" : "Spock: %c%c%c%c", menu_item.spock[3], menu_item.spock[2], menu_item.spock[1], menu_item.spock[0]);
+        hardwareText[0] = GUI::Printf(10, 40, "Tachyon: 0x%08X", guiData.tachyon);
+        hardwareText[1] = GUI::Printf(10, 60, "Baryon: 0x%08X (%d.%d)", guiData.baryon, PSP_SYSCON_BARYON_GET_VERSION_MAJOR(guiData.baryon), PSP_SYSCON_BARYON_GET_VERSION_MINOR(guiData.baryon));
+        hardwareText[2] = GUI::Printf(10, 80, "Pommel: 0x%08X", guiData.pommel);
+        hardwareText[3] = GUI::Printf(10, 100, "Polestar: 0x%08X", guiData.polestar);
+        hardwareText[4] = GUI::Printf(10, 120, "FuseID: 0x%llX", guiData.fuseid);
+        hardwareText[5] = GUI::Printf(10, 140, "FuseCFG: 0x%08X", guiData.fusecfg);
+        hardwareText[6] = GUI::Printf(10, 160, "IDScramble: 0x%08X", guiData.scramble);
+        hardwareText[7] = GUI::Printf(10, 180, "Kirk: %c%c%c%c", guiData.kirk[3], guiData.kirk[2], guiData.kirk[1], guiData.kirk[0]);
+        hardwareText[8] = GUI::Printf(10, 200, model == 4 ? "Spock: -" : "Spock: %c%c%c%c", guiData.spock[3], guiData.spock[2], guiData.spock[1], guiData.spock[0]);
         hardwareText[9] = GUI::Printf(10, 220, HardwareInfo::GetModelSymbol() != -1 ? trans->hardware.model : trans->hardware.no_model, model == 4 ? "N" : model == 10 ? "E" : "", HardwareInfo::GetModelSymbol(), pspGetRegion() < 10 ? "0" : "", pspGetRegion(), HardwareInfo::GetModel());
         
-        hardwareText[10] = GUI::Printf(250, 40, trans->hardware.mobo, HardwareInfo::GetMotherboard(&menu_item.tachyon, &menu_item.baryon, &menu_item.pommel));
+        hardwareText[10] = GUI::Printf(250, 40, trans->hardware.mobo, HardwareInfo::GetMotherboard(&guiData.tachyon, &guiData.baryon, &guiData.pommel));
         hardwareText[11] = GUI::Printf(250, 60, trans->hardware.region, HardwareInfo::GetRegion());
         hardwareText[12] = GUI::Printf(250, 80, trans->hardware.gen, model < 10 ? "0" : "", model + 1);
-        hardwareText[13] = GUI::Printf(250, 100, trans->hardware.eeprom, menu_item.tachyon <= 0x00500000 && menu_item.tachyon != 0x00100000 && menu_item.baryon <= 0x0022B200 ? trans->yes : trans->no);
-        hardwareText[14] = GUI::Printf(250, 120, trans->hardware.pandora, menu_item.tachyon <= 0x00500000 ? trans->yes : trans->no);
+        hardwareText[13] = GUI::Printf(250, 100, trans->hardware.eeprom, guiData.tachyon <= 0x00500000 && guiData.tachyon != 0x00100000 && guiData.baryon <= 0x0022B200 ? trans->yes : trans->no);
+        hardwareText[14] = GUI::Printf(250, 120, trans->hardware.pandora, guiData.tachyon <= 0x00500000 ? trans->yes : trans->no);
         hardwareText[15] = GUI::Printf(250, 140, "MAC: %s", HardwareInfo::GetMacAddress());
-        hardwareText[16] = GUI::Printf(250, 160, trans->hardware.initialfw, menu_item.initialFw);
+        hardwareText[16] = GUI::Printf(250, 160, trans->hardware.initialfw, guiData.initialFw);
         hardwareText[17] = GUI::Printf(250, 180, trans->hardware.umdfw, model == 4 ? "-" : HardwareInfo::GetUMDFirmware());
         hardwareText[18] = GUI::Printf(250, 200, trans->hardware.nandsize, (pspNandGetPageSize() * pspNandGetPagesPerBlock() * pspNandGetTotalBlocks()) / 1024 / 1024);
         hardwareText[19] = GUI::Printf(250, 220, "QA Flag: %s", HardwareInfo::GetQAFlag());
@@ -153,18 +153,18 @@ namespace Menus {
         GUI::SetTitle(trans->battery_title);
         
         fadeCtrl = false;
-        bool first_cycle = true;
+        bool firstCycle = true;
         
         for(int update = 0;; update++) {
             if (update == 25 || fadeCtrl) {
                 update = 1;
-                first_cycle = fadeCtrl;
+                firstCycle = fadeCtrl;
                 fadeCtrl = false;
             }
             
             vlfGuiDrawFrame();
             
-            if (!first_cycle || update == 0) {
+            if (!firstCycle || update == 0) {
                 for(int i = 0; i < NUM_ITEMS_BATTERY; i++) {
                     if (batteryText[i] != nullptr) {
                         vlfGuiRemoveText(batteryText[i]);
@@ -175,7 +175,7 @@ namespace Menus {
                 int battery_percent = scePowerGetBatteryLifePercent();
                 int battery_life_time = scePowerGetBatteryLifeTime();
                 
-                if (update != 0 && scePowerIsBatteryExist() && swbt && (model == 0 || (menu_item.tachyon <= 0x00500000 && menu_item.baryon == 0x0022B200))) {
+                if (update != 0 && scePowerIsBatteryExist() && swbt && (model == 0 || (guiData.tachyon <= 0x00500000 && guiData.baryon == 0x0022B200))) {
                     pspReadSerial(bSerialData);
                     
                     u16 wrbuffer[0x80];
@@ -217,11 +217,11 @@ namespace Menus {
                 batteryText[8] = GUI::Printf(240, 90, scePowerGetBatteryTemp() <= 0 ? trans->battery.no_temperature : trans->battery.temperature, scePowerGetBatteryTemp());
                 batteryText[9] = GUI::Printf(240, 110, scePowerGetBatteryRemainCapacity() <= 0 ? trans->battery.no_remain_capacity : trans->battery.remain_capacity, scePowerGetBatteryRemainCapacity());
                 batteryText[10] = GUI::Printf(240, 130, scePowerGetBatteryFullCapacity() <= 0 ? trans->battery.no_total_capacity : trans->battery.total_capacity, scePowerGetBatteryFullCapacity());
-                batteryText[11] = GUI::Printf(240, 150, scePowerIsBatteryExist() && (model == 0 || (menu_item.tachyon == 0x00500000 && menu_item.baryon == 0x0022B200)) && checkbt ? trans->battery.serial : trans->battery.no_serial, bSerialData[0], bSerialData[1]);	
+                batteryText[11] = GUI::Printf(240, 150, scePowerIsBatteryExist() && (model == 0 || (guiData.tachyon == 0x00500000 && guiData.baryon == 0x0022B200)) && checkbt ? trans->battery.serial : trans->battery.no_serial, bSerialData[0], bSerialData[1]);	
                 batteryText[12] = GUI::Printf(240, 170, trans->battery.mode, 
-                    checkbt && scePowerIsBatteryExist() && bSerialData[0] == 0xFFFF && bSerialData[1] == 0xFFFF && (model == 0 || (menu_item.tachyon <= 0x00500000 && menu_item.baryon == 0x0022B200)) ? trans->battery.mode_service :
-                    checkbt && scePowerIsBatteryExist() && bSerialData[0] == 0x0000 && bSerialData[1] == 0x0000 && (model == 0 || (menu_item.tachyon <= 0x00500000 && menu_item.baryon == 0x0022B200)) ? trans->battery.mode_autoboot :
-                    checkbt && scePowerIsBatteryExist() && (model == 0 || (menu_item.tachyon <= 0x00500000 && menu_item.baryon == 0x0022B200)) ? trans->battery.mode_default : "-");
+                    checkbt && scePowerIsBatteryExist() && bSerialData[0] == 0xFFFF && bSerialData[1] == 0xFFFF && (model == 0 || (guiData.tachyon <= 0x00500000 && guiData.baryon == 0x0022B200)) ? trans->battery.mode_service :
+                    checkbt && scePowerIsBatteryExist() && bSerialData[0] == 0x0000 && bSerialData[1] == 0x0000 && (model == 0 || (guiData.tachyon <= 0x00500000 && guiData.baryon == 0x0022B200)) ? trans->battery.mode_autoboot :
+                    checkbt && scePowerIsBatteryExist() && (model == 0 || (guiData.tachyon <= 0x00500000 && guiData.baryon == 0x0022B200)) ? trans->battery.mode_default : "-");
                 batteryText[13] = GUI::Printf(240, 190, pspSysconBatteryGetTotalElec(&total_elec) < 0? "Total Elec Charge: -" : "Total Elec Charge: %d mA", total_elec);
             }
             
@@ -252,7 +252,7 @@ namespace Menus {
         
         GUI::SetTitle(trans->system_title);
         
-        systemText[0] = GUI::Printf(10, 45, trans->system.fw, SystemInfo::GetFirmware(&menu_item.devkit));
+        systemText[0] = GUI::Printf(10, 45, trans->system.fw, SystemInfo::GetFirmware(&guiData.devkit));
         systemText[1] = GUI::Printf(10, 65, trans->system.button_assign);
         
         if (button_assign) {
@@ -272,8 +272,8 @@ namespace Menus {
         systemText[4] = GUI::Printf(237, 65, trans->system.password, Utils::GetRegistryValue("/CONFIG/SYSTEM/LOCK", "password", &password, sizeof(password), 0));
         systemText[5] = GUI::Printf(10, 120, "version.txt:");
         
-        if (menu_item.versionTxt != nullptr) {
-            systemText[6] = vlfGuiAddTextF(10, 143, menu_item.versionTxt);
+        if (guiData.versionTxt != nullptr) {
+            systemText[6] = vlfGuiAddTextF(10, 143, guiData.versionTxt);
         }
         else {
             systemText[6] = GUI::Printf(10, 143, trans->system.vertxterr);
@@ -287,18 +287,18 @@ namespace Menus {
     void ConsoleIdInfo(void) {
         GUI::SetTitle("Console ID Information");
 
-        consoleIdText[0] = GUI::Printf(10, 40, "PSID: %s", ConsoleIdInfo::GetPSID(&menu_item.psid));
+        consoleIdText[0] = GUI::Printf(10, 40, "PSID: %s", ConsoleIdInfo::GetPSID(&guiData.psid));
         
-        consoleIdText[1] = GUI::Printf(10, 60, "Company Code: %d", menu_item.pscode.companyCode);
+        consoleIdText[1] = GUI::Printf(10, 60, "Company Code: %d", guiData.pscode.companyCode);
         
-        consoleIdText[2] = GUI::Printf(10, 90, "Factory Code: %d", menu_item.pscode.factoryCode);
-        consoleIdText[3] = GUI::Printf(10, 110, ConsoleIdInfo::GetFactoryCode(menu_item.pscode.factoryCode));
+        consoleIdText[2] = GUI::Printf(10, 90, "Factory Code: %d", guiData.pscode.factoryCode);
+        consoleIdText[3] = GUI::Printf(10, 110, ConsoleIdInfo::GetFactoryCode(guiData.pscode.factoryCode));
         
-        consoleIdText[4] = GUI::Printf(10, 140, "Product Code: 0x%04X", menu_item.pscode.productCode);
-        consoleIdText[5] = GUI::Printf(10, 160, ConsoleIdInfo::GetProductCode(menu_item.pscode.productCode));
+        consoleIdText[4] = GUI::Printf(10, 140, "Product Code: 0x%04X", guiData.pscode.productCode);
+        consoleIdText[5] = GUI::Printf(10, 160, ConsoleIdInfo::GetProductCode(guiData.pscode.productCode));
         
-        consoleIdText[6] = GUI::Printf(10, 190, "Product Sub Code: 0x%04X", menu_item.pscode.productSubCode);
-        consoleIdText[7] = GUI::Printf(10, 210, ConsoleIdInfo::GetProductSubCode(menu_item.pscode.productSubCode));
+        consoleIdText[6] = GUI::Printf(10, 190, "Product Sub Code: 0x%04X", guiData.pscode.productSubCode);
+        consoleIdText[7] = GUI::Printf(10, 210, ConsoleIdInfo::GetProductSubCode(guiData.pscode.productSubCode));
         
         GUI::SetBottomDialog(false, true, Menus::ConsoleIdInfoHandler, true);
         GUI::SetFade();
@@ -328,6 +328,11 @@ namespace Menus {
                 }
                 
                 miscText[0] = GUI::Printf(10, 40, "Headphone status: %s", MiscInfo::GetHeadphoneStatus());
+                miscText[1] = GUI::Printf(10, 60, "Hold switch: %s", MiscInfo::GetHoldSwitchState());
+
+                if (model != 10) {
+                    miscText[2] = GUI::Printf(10, 80, "Wlan switch: %s", MiscInfo::GetWlanSwitchState());
+                }
             }
 
             if (!update) {
@@ -404,9 +409,9 @@ namespace Menus {
     }
     
     void MainMenu(int select) {
-        GUI::SetTitle("PSP EVEREST 2 Rev 9");
+        GUI::SetTitle("PSP EVEREST 2 Rev 10");
         
-        const char *main_menu_items[] = {
+        const char *main_guiDatas[] = {
             "Hardware Information",
             "Battery Information",
             "Software Information",
@@ -415,7 +420,7 @@ namespace Menus {
             "Exit"
         };
         
-        vlfGuiCentralMenu(NUM_ITEMS_MAIN, main_menu_items, select, Menus::MainMenuHandler, 0, 0);
+        vlfGuiCentralMenu(NUM_ITEMS_MAIN, main_guiDatas, select, Menus::MainMenuHandler, 0, 0);
         GUI::SetBottomDialog(true, false, Menus::MainMenuHandler, false);
     }
 }
@@ -431,21 +436,21 @@ extern "C" int app_main(int argc, char *argv[]) {
         vlfGuiSetLanguage(PSP_SYSTEMPARAM_LANGUAGE_ENGLISH);
     }
         
-    *(u32 *)menu_item.kirk = pspGetKirkVersion();
-    *(u32 *)menu_item.spock = pspGetSpockVersion();
-    menu_item.tachyon = pspGetTachyonVersion();
-    menu_item.fuseid = pspGetFuseId();
-    menu_item.fusecfg = pspGetFuseConfig();
-    menu_item.scramble = pspNandGetScramble();
-    pspGetBaryonVersion(&menu_item.baryon);
-    pspGetPommelVersion(&menu_item.pommel);
-    pspGetPolestarVersion(&menu_item.polestar);
-    menu_item.devkit = sceKernelDevkitVersion();
-    pspGetInitialFW(menu_item.initialFw);
-    pspChkregGetPsCode(&menu_item.pscode);
-    sceOpenPSIDGetOpenPSID(&menu_item.psid);
+    *(u32 *)guiData.kirk = pspGetKirkVersion();
+    *(u32 *)guiData.spock = pspGetSpockVersion();
+    guiData.tachyon = pspGetTachyonVersion();
+    guiData.fuseid = pspGetFuseId();
+    guiData.fusecfg = pspGetFuseConfig();
+    guiData.scramble = pspNandGetScramble();
+    pspGetBaryonVersion(&guiData.baryon);
+    pspGetPommelVersion(&guiData.pommel);
+    pspGetPolestarVersion(&guiData.polestar);
+    guiData.devkit = sceKernelDevkitVersion();
+    pspGetInitialFW(guiData.initialFw);
+    pspChkregGetPsCode(&guiData.pscode);
+    sceOpenPSIDGetOpenPSID(&guiData.psid);
     Utils::GetRegistryValue("/CONFIG/SYSTEM/XMB", "button_assign", &button_assign, 4, 1);
-    menu_item.versionTxt = SystemInfo::GetVersionTxt();
+    guiData.versionTxt = SystemInfo::GetVersionTxt();
     
     vlfGuiSystemSetup(1, 1, 1);
     vlfGuiAddEventHandler(PSP_CTRL_RTRIGGER, -1, GUI::OnBackgroundPlus, nullptr);

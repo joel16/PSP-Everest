@@ -17,8 +17,8 @@ namespace GUI {
     static VlfPicture title_pic;
     static VlfText title_text;
 
-    void SetBottomDialog(bool enter, bool back, int (* handler)(int enter), bool delete_bd) {
-        if (delete_bd) {
+    void SetBottomDialog(bool enter, bool back, int (* handler)(int enter), bool clear) {
+        if (clear) {
             if (button_assign) {
                 vlfGuiBottomDialog(back ? VLF_DI_BACK : -1, enter ? VLF_DI_ENTER : -1, 1, 0, 0, nullptr);
             }

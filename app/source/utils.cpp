@@ -36,19 +36,21 @@ namespace Utils {
     
     void ASCIIToUnicode(char *unicode, const char *ascii) {
         while(*ascii != '\0') {
-            if (static_cast<unsigned char>(*ascii) >= 0xC0) {
-                *unicode++ = static_cast<unsigned char>(*ascii) - 0xB0;
+            unsigned char c = static_cast<unsigned char>(*ascii);
+
+            if (c >= 0xC0) {
+                *unicode++ = c - 0xB0;
                 *unicode++ = 0x04;
             }
-            else if (static_cast<unsigned char>(*ascii) == 0x99) {
+            else if (c == 0x99) {
                 *unicode++ = 0x22;
                 *unicode++ = 0x21;
             }
-            else if (static_cast<unsigned char>(*ascii) == 0xB8) {
+            else if (c == 0xB8) {
                 *unicode++ = 0x51;
                 *unicode++ = 0x04;
             }
-            else if (static_cast<unsigned char>(*ascii) == 0xA8) {
+            else if (c == 0xA8) {
                 *unicode++ = 0x01;
                 *unicode++ = 0x04;
             }

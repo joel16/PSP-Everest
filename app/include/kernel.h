@@ -6,6 +6,9 @@ extern "C" {
 
 #include <pspsdk.h>
 
+#define PSP_SYSCON_BARYON_GET_VERSION_MAJOR(v)    (((v) >> 20) & 0xF)
+#define PSP_SYSCON_BARYON_GET_VERSION_MINOR(v)    (((v) >> 16) & 0xF)
+
 /**
  * This structure contains console specific information. It is a subset of the ::SceConsoleId.
  * Check <openpsid_kernel.h> for possible member values.
@@ -21,9 +24,9 @@ typedef struct {
     u16 factoryCode; // 6
 } ScePsCode; // size = 8
 
-u32 pspGetBaryonVersion(s32 *baryon);
-u32 pspGetPommelVersion(s32 *pommel);
-u32 pspGetPolestarVersion(s32 *polestar);
+int pspGetBaryonVersion(int *baryon);
+int pspGetPommelVersion(int *pommel);
+int pspGetPolestarVersion(int *polestar);
 u32 pspGetTachyonVersion(void);
 u64 pspGetFuseId(void);
 u32 pspGetFuseConfig(void);
@@ -44,6 +47,8 @@ int pspSysconBatteryGetElec(int *elec);
 int pspSysconBatteryGetTotalElec(int *elec);
 int pspGetModel(void);
 s8 pspGetHPConnect(void);
+s8 pspGetWlanSwitch(void);
+s8 pspGetHoldSwitch(void);
 
 #if defined (__cplusplus)
 }

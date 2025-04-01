@@ -18,8 +18,8 @@ char outtxt[0x12];
 namespace HardwareInfo {
     typedef struct {
         s32 tachyon;
-        s32 baryon;
-        s32 pommel;
+        int baryon;
+        int pommel;
         const char *mobo_name;
     } Motherboard;
     
@@ -98,7 +98,7 @@ namespace HardwareInfo {
         return "-";
     }
     
-    char *GetMotherboard(s32 *tachyon, s32 *baryon, s32 *pommel) {
+    char *GetMotherboard(s32 *tachyon, int *baryon, int *pommel) {
         char initial_fw[8];
         char *ret_mobo = const_cast<char *>("-");
         

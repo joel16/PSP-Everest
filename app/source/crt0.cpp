@@ -23,7 +23,7 @@ namespace Callbacks {
         return 0;
     }
     
-    int SetupCallbacks(void) {
+    int Setup(void) {
         int thid = sceKernelCreateThread("PSP_EVEREST_UPDATE_THREAD", Callbacks::Thread, 0x11, 0xFA0, 0, 0);
         if (thid >= 0) {
             sceKernelStartThread(thid, 0, 0);
@@ -92,7 +92,7 @@ int start_thread(SceSize args, void *argp) {
 }
 
 int module_start(SceSize args, void *argp) {
-    Callbacks::SetupCallbacks();
+    Callbacks::Setup();
     sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &language);
     
     SceUID thid = sceKernelCreateThread("PSP_EVEREST_START_THREAD", start_thread, 0x10, 0x4000, 0, nullptr);
