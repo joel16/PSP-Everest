@@ -15,4 +15,5 @@ namespace GUI {
     int OnBackgroundPlus(void *param);
     int OnBackgroundMinus(void *param);
     VlfText Printf(int x, int y, const char *text, ...);
+    void ClearText(VlfText* textList, int size);
 }

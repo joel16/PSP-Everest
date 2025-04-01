@@ -38,7 +38,7 @@ typedef struct {
     char *versionTxt;
 } GuiData;
 
-static GuiData guiData = { 0 };
+static GuiData guiData{};
 int model = 0, language = 0;
 
 namespace Menus {
@@ -47,7 +47,7 @@ namespace Menus {
     static constexpr u8 NUM_ITEMS_BATTERY = 14;
     static constexpr u8 NUM_ITEMS_SYSTEM = 7;
     static constexpr u8 NUM_ITEMS_CONSOLEID = 8;
-    static constexpr u8 NUM_ITEMS_MISC = 4;
+    static constexpr u8 NUM_ITEMS_MISC = 3;
 
     static u8 menu = 0;
     static bool clear = false;
@@ -66,12 +66,10 @@ namespace Menus {
 
     void MainMenu(int select);
 
-    int SubMenuHandler(int enter, bool clear, int max_items, VlfText *items, int selection) {
+    int SubMenuHandler(int enter, bool clear, int max, VlfText *items, int selection) {
         if (!enter) {
             if (!clear) {
-                for(int i = 0; i < max_items; i++) {
-                    vlfGuiRemoveText(items[i]);
-                }
+                GUI::ClearText(items, max);
             }
             
             if (!button_assign) {
@@ -165,12 +163,7 @@ namespace Menus {
             vlfGuiDrawFrame();
             
             if (!firstCycle || update == 0) {
-                for(int i = 0; i < NUM_ITEMS_BATTERY; i++) {
-                    if (batteryText[i] != nullptr) {
-                        vlfGuiRemoveText(batteryText[i]);
-                        batteryText[i] = nullptr;
-                    }
-                }
+                GUI::ClearText(batteryText, NUM_ITEMS_BATTERY);
                 
                 int battery_percent = scePowerGetBatteryLifePercent();
                 int battery_life_time = scePowerGetBatteryLifeTime();
@@ -233,13 +226,7 @@ namespace Menus {
             vlfGuiDrawFrame();
             
             if (clear) {
-                for(int i = 0; i < NUM_ITEMS_BATTERY; i++) {
-                    if (batteryText[i] != nullptr) {
-                        vlfGuiRemoveText(batteryText[i]);
-                        batteryText[i] = nullptr;
-                    }
-                }
-                
+                GUI::ClearText(batteryText, NUM_ITEMS_BATTERY);
                 break;
             }
         }
@@ -320,12 +307,7 @@ namespace Menus {
             vlfGuiDrawFrame();
             
             if (!firstCycle || update == 0) {
-                for(int i = 0; i < NUM_ITEMS_MISC; i++) {
-                    if (miscText[i] != nullptr) {
-                        vlfGuiRemoveText(miscText[i]);
-                        miscText[i] = nullptr;
-                    }
-                }
+                GUI::ClearText(miscText, NUM_ITEMS_MISC);
                 
                 miscText[0] = GUI::Printf(10, 40, "Headphone status: %s", MiscInfo::GetHeadphoneStatus());
                 miscText[1] = GUI::Printf(10, 60, "Hold switch: %s", MiscInfo::GetHoldSwitchState());
@@ -343,13 +325,7 @@ namespace Menus {
             vlfGuiDrawFrame();
             
             if (clear) {
-                for(int i = 0; i < NUM_ITEMS_MISC; i++) {
-                    if (miscText[i] != nullptr) {
-                        vlfGuiRemoveText(miscText[i]);
-                        miscText[i] = nullptr;
-                    }
-                }
-                
+                GUI::ClearText(miscText, NUM_ITEMS_MISC);
                 break;
             }
         }
@@ -411,7 +387,7 @@ namespace Menus {
     void MainMenu(int select) {
         GUI::SetTitle("PSP EVEREST 2 Rev 10");
         
-        const char *main_guiDatas[] = {
+        const char *mainMenuList[] = {
             "Hardware Information",
             "Battery Information",
             "Software Information",
@@ -420,7 +396,7 @@ namespace Menus {
             "Exit"
         };
         
-        vlfGuiCentralMenu(NUM_ITEMS_MAIN, main_guiDatas, select, Menus::MainMenuHandler, 0, 0);
+        vlfGuiCentralMenu(NUM_ITEMS_MAIN, mainMenuList, select, Menus::MainMenuHandler, 0, 0);
         GUI::SetBottomDialog(true, false, Menus::MainMenuHandler, false);
     }
 }

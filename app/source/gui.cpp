@@ -91,4 +91,13 @@ namespace GUI {
         Utils::ASCIIToUnicode(unicode, ascii);
         return vlfGuiAddTextW(x, y, reinterpret_cast<u16 *>(unicode));
     }
+    
+    void ClearText(VlfText* textList, int size) {
+        for (int i = 0; i < size; i++) {
+            if (textList[i] != nullptr) {
+                vlfGuiRemoveText(textList[i]);
+                textList[i] = nullptr;
+            }
+        }
+    }
 }
